@@ -933,6 +933,15 @@ body {
   border-bottom: 0.5px solid var(--mid);
 }
 
+.glossary-mastered-tick {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 5px;
+  color: var(--ember);
+  vertical-align: middle;
+}
+.glossary-mastered-tick svg { width: 13px; height: 13px; }
+
 .glossary-english {
   font-size: 13px;
   font-weight: 300;

@@ -315,8 +315,9 @@ function renderGlossary() {
     poses.forEach(pose => {
       const row = document.createElement('div');
       row.className = 'glossary-row';
+      const mastered = isMastered(pose.id);
       row.innerHTML = `
-        <span class="glossary-english">${pose.english}</span>
+        <span class="glossary-english">${pose.english}${mastered ? '<span class="glossary-mastered-tick">' + ICON_CHECK + '</span>' : ''}</span>
         <span class="glossary-sanskrit">${pose.sanskrit}</span>
       `;
       section.appendChild(row);
