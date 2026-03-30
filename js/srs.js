@@ -56,13 +56,18 @@ function isDue(poseId) {
   return card.totalSeen > 0 && card.nextReview <= Date.now();
 }
 
+function isMastered(poseId) {
+  // interval >= 6 = successfully recalled at least twice across separate days
+  return getCardData(poseId).interval >= 6;
+}
+
 function getStats(poses) {
   poses = poses || POSES;
-  let newCount = 0, dueCount = 0, learnedCount = 0;
+  let dueCount = 0, masteredCount = 0, practicingCount = 0;
   poses.forEach(p => {
-    if (isNew(p.id))       newCount++;
-    else if (isDue(p.id))  dueCount++;
-    else                   learnedCount++;
+    if (isDue(p.id))           dueCount++;
+    if (isMastered(p.id))      masteredCount++;
+    else if (!isNew(p.id))     practicingCount++;
   });
-  return { newCount, dueCount, learnedCount, total: poses.length };
+  return { dueCount, masteredCount, practicingCount, total: poses.length };
 }

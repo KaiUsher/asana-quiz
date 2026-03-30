@@ -17,24 +17,19 @@
 
       <header class="home-header">
         <div class="app-title">Asana</div>
-        <div class="app-subtitle">Sanskrit · Memory Practice</div>
+        <div class="app-subtitle">Sanskrit Memory Practice</div>
       </header>
 
-      <div class="stats-row">
-        <div class="stat-item">
-          <div class="stat-number" id="stat-new">0</div>
-          <div class="stat-label">New</div>
+      <div class="mastery-block">
+        <div class="mastery-fraction">
+          <span id="stat-mastered">0</span><span class="mastery-total" id="stat-total">&thinsp;/&thinsp;30</span>
         </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-          <div class="stat-number" id="stat-due">0</div>
-          <div class="stat-label">Due</div>
+        <div class="mastery-label">poses mastered</div>
+        <div class="mastery-bar-track">
+          <div class="mastery-bar-practicing" id="mastery-bar-practicing"></div>
+          <div class="mastery-bar-mastered" id="mastery-bar-mastered"></div>
         </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-          <div class="stat-number" id="stat-learned">0</div>
-          <div class="stat-label">Learned</div>
-        </div>
+        <div class="mastery-sub" id="mastery-sub"></div>
       </div>
 
       <button id="start-btn" class="btn-primary btn-ember">Begin Practice</button>
@@ -70,7 +65,30 @@
         </div>
       </div>
 
-      <button id="glossary-link" class="glossary-link">Asana glossary</button>
+      <div class="home-footer">
+        <button id="glossary-link" class="home-footer-link">Asana glossary</button>
+        <span class="home-footer-sep">·</span>
+        <button id="how-it-works-link" class="home-footer-link">How it works</button>
+      </div>
+
+      <!-- Onboarding modal -->
+      <div id="onboarding-modal" class="onboarding-modal" role="dialog" aria-modal="true">
+        <div class="onboarding-card">
+          <button id="onboarding-skip" class="onboarding-skip">Skip</button>
+          <div id="onboarding-content" class="onboarding-content">
+            <div id="onboarding-icon" class="onboarding-icon"></div>
+            <div id="onboarding-heading" class="onboarding-heading"></div>
+            <p id="onboarding-body" class="onboarding-body"></p>
+          </div>
+          <div class="onboarding-dots">
+            <span class="onboarding-dot"></span>
+            <span class="onboarding-dot"></span>
+            <span class="onboarding-dot"></span>
+            <span class="onboarding-dot"></span>
+          </div>
+          <button id="onboarding-next" class="btn-primary btn-ember">Next</button>
+        </div>
+      </div>
 
     </div>
   </div>

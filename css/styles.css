@@ -116,40 +116,68 @@ body {
   margin-top: 8px;
 }
 
-/* Stats row */
-.stats-row {
-  display: flex;
-  align-items: center;
+/* Mastery block */
+.mastery-block {
   margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 0.5px solid var(--mid);
 }
 
-.stat-item {
-  flex: 1;
-  text-align: center;
-}
-
-.stat-number {
+.mastery-fraction {
   font-family: 'Cormorant Garamond', serif;
   font-weight: 300;
-  font-size: 34px;
+  font-size: 52px;
   line-height: 1;
   color: var(--charcoal);
+  letter-spacing: -0.01em;
 }
 
-.stat-label {
-  font-size: 9px;
-  font-weight: 500;
+.mastery-total {
+  font-size: 32px;
+  color: var(--ash);
+}
+
+.mastery-label {
+  font-size: 10px;
+  font-weight: 400;
   letter-spacing: 0.25em;
   text-transform: uppercase;
   color: var(--ash);
-  margin-top: 4px;
+  margin-top: 6px;
+  margin-bottom: 1rem;
 }
 
-.stat-divider {
-  width: 0.5px;
-  height: 28px;
+.mastery-bar-track {
+  position: relative;
+  height: 3px;
   background: var(--mid);
+  border-radius: 2px;
+  overflow: hidden;
 }
+
+.mastery-bar-practicing,
+.mastery-bar-mastered {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.6s ease;
+}
+
+.mastery-bar-practicing { background: #ddb99a; } /* muted ember — practicing */
+.mastery-bar-mastered   { background: var(--ember); } /* full ember — mastered */
+
+.mastery-sub {
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  color: var(--ash);
+  margin-top: 0.6rem;
+  min-height: 1rem;
+}
+.mastery-sub.has-due { color: var(--ember); }
 
 /* Settings toggle & panel */
 .settings-toggle {
@@ -721,11 +749,17 @@ body {
 }
 
 
-/* ── Glossary link (home) ─────────────────────────────────── */
-.glossary-link {
-  display: block;
-  width: 100%;
+/* ── Home footer links ────────────────────────────────────── */
+.home-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
   margin-top: 2.5rem;
+  padding-bottom: 1rem;
+}
+
+.home-footer-link {
   background: none;
   border: none;
   font-size: 10px;
@@ -734,11 +768,111 @@ body {
   text-transform: uppercase;
   color: var(--ash);
   cursor: pointer;
-  text-align: center;
   transition: color 0.15s ease;
-  padding-bottom: 1rem;
+  padding: 0;
 }
-.glossary-link:hover { color: var(--charcoal); }
+.home-footer-link:hover { color: var(--charcoal); }
+
+.home-footer-sep {
+  color: var(--mid);
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* ── Onboarding modal ─────────────────────────────────────── */
+.onboarding-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 26, 24, 0.65);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: resultFade 0.25s ease forwards;
+}
+.onboarding-modal.visible { display: flex; }
+
+.onboarding-card {
+  background: var(--light);
+  border-radius: 6px;
+  width: 100%;
+  max-width: 340px;
+  padding: 2rem 1.75rem 1.75rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  animation: resultSlideUp 0.3s ease forwards;
+}
+
+.onboarding-skip {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  background: none;
+  border: none;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ash);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.onboarding-skip:hover { color: var(--charcoal); }
+
+.onboarding-content {
+  text-align: center;
+  margin-bottom: 1.75rem;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.onboarding-content.fading {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.onboarding-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  color: var(--ember);
+}
+.onboarding-icon svg { width: 44px; height: 44px; }
+
+.onboarding-heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  color: var(--charcoal);
+  margin-bottom: 0.75rem;
+}
+
+.onboarding-body {
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: var(--ash);
+  line-height: 1.75;
+}
+
+.onboarding-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 1.25rem;
+}
+
+.onboarding-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--mid);
+  transition: background 0.2s ease;
+}
+.onboarding-dot.active { background: var(--ember); }
 
 /* ═══════════════════════════════════════════════════════════
    GLOSSARY SCREEN

@@ -41,7 +41,10 @@ function buildSession(categoryFilter, sessionLength) {
   const relevantInsights = INSIGHTS.filter(ins =>
     ins.poseIds.some(id => sessionPoseIds.has(id))
   );
-  const insight = relevantInsights.length > 0 ? randomFrom(relevantInsights) : null;
+  const recent       = getRecentInsightIds();
+  const freshInsights = relevantInsights.filter(ins => !recent.includes(ins.id));
+  const insightPool  = freshInsights.length > 0 ? freshInsights : relevantInsights;
+  const insight      = insightPool.length > 0 ? randomFrom(insightPool) : null;
 
   session = {
     questions: ordered.map(pose => _buildQuestion(pose, pool)),
