@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asana — Sanskrit Practice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ── HOME ────────────────────────────────────────────── -->
+  <div id="screen-home" class="screen">
+    <div class="container">
+
+      <header class="home-header">
+        <div class="app-title">Asana</div>
+        <div class="app-subtitle">Sanskrit · Memory Practice</div>
+      </header>
+
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-number" id="stat-new">0</div>
+          <div class="stat-label">New</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-number" id="stat-due">0</div>
+          <div class="stat-label">Due</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-number" id="stat-learned">0</div>
+          <div class="stat-label">Learned</div>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn-primary btn-ember">Begin Practice</button>
+
+      <button id="settings-toggle" class="settings-toggle">
+        <span id="settings-toggle-label">Customise session</span>
+        <span id="settings-caret" class="settings-caret"></span>
+      </button>
+
+      <div id="settings-panel" class="settings-panel">
+        <div class="settings-inner">
+          <div class="section-label">Session length</div>
+          <div class="length-picker">
+            <button class="length-option" data-length="5">
+              <span class="length-label">Quick</span>
+              <span class="length-number">5</span>
+            </button>
+            <button class="length-option active" data-length="10">
+              <span class="length-label">Standard</span>
+              <span class="length-number">10</span>
+            </button>
+            <button class="length-option" data-length="20">
+              <span class="length-label">Long</span>
+              <span class="length-number">20</span>
+            </button>
+          </div>
+
+          <div class="section-label">Practice focus</div>
+          <div id="category-pills" class="category-pills"></div>
+
+          <div class="settings-divider"></div>
+          <button id="reset-btn" class="btn-reset">Reset to default</button>
+        </div>
+      </div>
+
+      <button id="glossary-link" class="glossary-link">Asana glossary</button>
+
+    </div>
+  </div>
+
+  <!-- ── GLOSSARY ──────────────────────────────────────────── -->
+  <div id="screen-glossary" class="screen">
+    <div class="glossary-header">
+      <button id="glossary-back-btn" class="quit-btn" aria-label="Back"></button>
+      <div class="glossary-header-title">Asana Glossary</div>
+    </div>
+    <div class="glossary-body" id="glossary-body"></div>
+  </div>
+
+  <!-- ── QUIZ ────────────────────────────────────────────── -->
+  <div id="screen-quiz" class="screen">
+
+    <div class="quiz-header">
+      <button id="quit-btn" class="quit-btn" aria-label="Quit"></button>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-label" id="progress-label">1 / 10</div>
+    </div>
+
+    <div class="container quiz-container">
+
+      <div class="question-card">
+        <div class="question-label" id="question-label">What is the Sanskrit name?</div>
+        <div class="question-text" id="question-text"></div>
+      </div>
+
+      <div class="options-grid" id="options-grid"></div>
+
+      <div class="feedback" id="feedback">
+        <div class="feedback-text" id="feedback-text"></div>
+        <button id="continue-btn" class="btn-continue">Continue</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── INSIGHT ─────────────────────────────────────────── -->
+  <div id="screen-insight" class="screen">
+    <div class="insight-panel">
+      <div class="insight-inner">
+        <div class="insight-prelude">A moment to breathe</div>
+        <div class="insight-root" id="insight-root"></div>
+        <div class="insight-rule"></div>
+        <div class="insight-meaning" id="insight-meaning"></div>
+        <p class="insight-body" id="insight-body"></p>
+        <div class="insight-poses-label">You'll find it in</div>
+        <div class="insight-poses" id="insight-poses"></div>
+        <button id="insight-continue-btn" class="btn-primary btn-ember">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RESULT ───────────────────────────────────────────── -->
+  <div id="screen-result" class="screen">
+    <div class="result-panel">
+      <div class="result-inner">
+        <div class="result-label">Practice complete</div>
+        <div class="result-score" id="result-score">0 / 10</div>
+        <div class="result-message" id="result-message"></div>
+        <div class="result-dots" id="result-dots"></div>
+        <div class="result-actions">
+          <button id="again-btn" class="btn-primary btn-ember">Practice again</button>
+          <button id="home-btn" class="btn-ghost">Return home</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/poses.js"></script>
+  <script src="js/insights.js"></script>
+  <script src="js/srs.js"></script>
+  <script src="js/quiz.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
