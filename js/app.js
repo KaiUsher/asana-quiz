@@ -728,22 +728,21 @@ function renderOnboardingSlide(animate) {
 }
 
 // ── Pose card ─────────────────────────────────────────────────
-let _tiltHandler  = null;
-let _cardList     = POSES;
-let _cardIndex    = 0;
-let _touchStartX  = 0;
+let _cardList    = POSES;
+let _cardIndex   = 0;
+let _touchStartX = 0;
 
 function showPoseCard(pose) {
   _cardList  = POSES;
   _cardIndex = POSES.findIndex(p => p.id === pose.id);
   _renderPoseCard();
   qs('#pose-card-overlay').classList.add('visible');
-  _enableTilt();
+  document.body.style.overflow = 'hidden';
 }
 
 function hidePoseCard() {
   qs('#pose-card-overlay').classList.remove('visible');
-  _disableTilt();
+  document.body.style.overflow = '';
 }
 
 function _renderPoseCard() {
@@ -773,34 +772,6 @@ function _navigatePoseCard(dir) {
   }, 110);
 }
 
-function _enableTilt() {
-  const card = qs('#pose-card');
-  const apply = () => {
-    _tiltHandler = (e) => {
-      const x = Math.max(-8, Math.min(8, (e.gamma || 0) * 0.12));
-      const y = Math.max(-8, Math.min(8, ((e.beta || 45) - 45) * 0.08));
-      card.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-    };
-    window.addEventListener('deviceorientation', _tiltHandler);
-  };
-
-  if (typeof DeviceOrientationEvent !== 'undefined' &&
-      typeof DeviceOrientationEvent.requestPermission === 'function') {
-    DeviceOrientationEvent.requestPermission()
-      .then(state => { if (state === 'granted') apply(); })
-      .catch(() => {});
-  } else if (window.DeviceOrientationEvent) {
-    apply();
-  }
-}
-
-function _disableTilt() {
-  if (_tiltHandler) {
-    window.removeEventListener('deviceorientation', _tiltHandler);
-    _tiltHandler = null;
-  }
-  qs('#pose-card').style.transform = '';
-}
 
 // ── Init ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
