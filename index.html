@@ -30,6 +30,7 @@
           <div class="mastery-bar-mastered" id="mastery-bar-mastered"></div>
         </div>
         <div class="mastery-sub" id="mastery-sub"></div>
+        <div class="streak-row" id="streak-row"></div>
       </div>
 
       <button id="start-btn" class="btn-primary btn-ember">Begin Practice</button>
@@ -41,27 +42,9 @@
 
       <div id="settings-panel" class="settings-panel">
         <div class="settings-inner">
-          <div class="section-label">Session length</div>
-          <div class="length-picker">
-            <button class="length-option" data-length="5">
-              <span class="length-label">Quick</span>
-              <span class="length-number">5</span>
-            </button>
-            <button class="length-option active" data-length="10">
-              <span class="length-label">Standard</span>
-              <span class="length-number">10</span>
-            </button>
-            <button class="length-option" data-length="20">
-              <span class="length-label">Long</span>
-              <span class="length-number">20</span>
-            </button>
-          </div>
-
           <div class="section-label">Practice focus</div>
           <div id="category-pills" class="category-pills"></div>
 
-          <div class="settings-divider"></div>
-          <button id="reset-btn" class="btn-reset">Reset to default</button>
         </div>
       </div>
 
@@ -110,7 +93,6 @@
       <div class="progress-track">
         <div class="progress-fill" id="progress-fill"></div>
       </div>
-      <div class="progress-label" id="progress-label">1 / 10</div>
     </div>
 
     <div class="container quiz-container">
@@ -151,10 +133,11 @@
     <div class="result-panel">
       <div class="result-inner">
         <div class="result-label">Practice complete</div>
+        <div class="result-streak" id="result-streak"></div>
         <div class="result-score" id="result-score">0 / 10</div>
         <div class="result-message" id="result-message"></div>
         <div class="result-dots" id="result-dots"></div>
-        <div class="result-actions">
+<div class="result-actions">
           <button id="again-btn" class="btn-primary btn-ember">Practice again</button>
           <button id="home-btn" class="btn-ghost">Return home</button>
         </div>
@@ -165,6 +148,7 @@
   <script src="js/poses.js"></script>
   <script src="js/insights.js"></script>
   <script src="js/srs.js"></script>
+  <script src="js/streak.js"></script>
   <script src="js/quiz.js"></script>
   <script src="js/app.js"></script>
 </body>

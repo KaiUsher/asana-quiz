@@ -77,6 +77,7 @@ function showScreen(id) {
 // ── Home ─────────────────────────────────────────────────────
 function renderHome() {
   renderStats();
+  renderStreak();
   renderLengthPicker();
   renderCategoryPills();
   showScreen('screen-home');
@@ -91,6 +92,17 @@ function renderLengthPicker() {
       renderLengthPicker();
     };
   });
+}
+
+function renderStreak() {
+  const streak = getStreak();
+  const el = qs('#streak-row');
+  if (streak < 1) {
+    el.innerHTML = '';
+    return;
+  }
+  const label = streak === 1 ? '1 day streak' : streak + ' day streak';
+  el.innerHTML = '<span class="streak-icon">' + ICON_FLAME + '</span>' + label;
 }
 
 function renderStats() {
@@ -153,18 +165,29 @@ function renderQuestion() {
   // Progress bar
   const pct = ((prog.current - 1) / prog.total) * 100;
   qs('#progress-fill').style.width = pct + '%';
-  qs('#progress-label').textContent = prog.current + ' / ' + prog.total;
 
-  // Direction
+  // Reset feedback and label margin
+  qs('#feedback').classList.remove('visible', 'correct', 'wrong');
+  qs('#question-label').style.marginBottom = '';
+
+  // Dispatch to type-specific setup
+  if (q.type === 'multiple-choice')  setupMultipleChoice(q);
+  else if (q.type === 'flashcard')   setupFlashcard(q);
+  else if (q.type === 'type-english') setupTypeEnglish(q);
+  else if (q.type === 'tile-build')  setupTileBuild(q);
+  else if (q.type === 'matching-pairs') setupMatchingPairs(q);
+}
+
+// ── Multiple choice ───────────────────────────────────────────
+function setupMultipleChoice(q) {
   const isEnToSa = q.direction === 'en-to-sa';
-  qs('#question-label').textContent = isEnToSa
-    ? 'What is the Sanskrit name?'
-    : 'What is the English name?';
-  qs('#question-text').textContent = isEnToSa ? q.pose.english : q.pose.sanskrit;
+  qs('#question-label').textContent = isEnToSa ? 'What is the Sanskrit name?' : 'What is the English name?';
+  qs('#question-text').textContent  = isEnToSa ? q.pose.english : q.pose.sanskrit;
 
-  // Options
   const grid = qs('#options-grid');
   grid.innerHTML = '';
+  grid.className = 'options-grid';
+
   q.options.forEach(optPose => {
     const btn = document.createElement('button');
     btn.className = 'option-card';
@@ -178,24 +201,18 @@ function renderQuestion() {
 
     btn.appendChild(label);
     btn.appendChild(icon);
-    btn.addEventListener('click', () => handleAnswer(optPose.id));
+    btn.addEventListener('click', () => handleMCAnswer(optPose.id));
     grid.appendChild(btn);
   });
-
-  // Reset feedback
-  const fb = qs('#feedback');
-  fb.classList.remove('visible', 'correct', 'wrong');
 }
 
-function handleAnswer(selectedId) {
-  // Lock options
+function handleMCAnswer(selectedId) {
   qsa('.option-card').forEach(btn => { btn.disabled = true; });
 
-  const correct = answerQuestion(selectedId);
   const q       = getCurrentQuestion();
+  const correct = selectedId === q.pose.id;
+  recordAnswer(correct ? 'correct' : 'incorrect', [q.pose.id]);
 
-  // Colour the cards, set icons, dim irrelevant options
-  // Relevant = always the correct card; also the wrong pick if answered incorrectly
   const relevantIds = new Set([q.pose.id]);
   if (!correct) relevantIds.add(selectedId);
 
@@ -208,32 +225,343 @@ function handleAnswer(selectedId) {
       btn.classList.add('wrong');
       icon.innerHTML = ICON_X;
     }
-    if (!relevantIds.has(btn.dataset.poseId)) {
-      btn.classList.add('dimmed');
-    }
+    if (!relevantIds.has(btn.dataset.poseId)) btn.classList.add('dimmed');
   });
 
-  // Feedback strip
+  showFeedback(correct ? 'correct' : 'wrong',
+    correct
+      ? randomFrom(CORRECT_COPY)
+      : 'The answer was <em>' + (q.direction === 'en-to-sa' ? q.pose.sanskrit : q.pose.english) + '</em>'
+  );
+}
+
+// ── Flashcard ────────────────────────────────────────────────
+function setupFlashcard(q) {
+  const isEnToSa = q.direction === 'en-to-sa';
+  qs('#question-label').textContent = isEnToSa ? 'What is the Sanskrit name?' : 'What is the English name?';
+  qs('#question-text').textContent  = isEnToSa ? q.pose.english : q.pose.sanskrit;
+
+  const grid = qs('#options-grid');
+  grid.innerHTML = '';
+  grid.className = 'options-grid options-grid--flashcard';
+
+  // Flip card
+  const container = document.createElement('div');
+  container.className = 'flashcard-container';
+
+  const inner = document.createElement('div');
+  inner.className = 'flashcard-inner';
+
+  const front = document.createElement('div');
+  front.className = 'flashcard-face flashcard-front';
+  front.innerHTML = '<span class="flashcard-hint">Think of your answer, then tap to reveal</span>';
+
+  const back = document.createElement('div');
+  back.className = 'flashcard-face flashcard-back';
+  back.textContent = isEnToSa ? q.pose.sanskrit : q.pose.english;
+
+  inner.appendChild(front);
+  inner.appendChild(back);
+  container.appendChild(inner);
+
+  // Grade buttons — shown after flip completes
+  const gradeRow = document.createElement('div');
+  gradeRow.className = 'flashcard-grade hidden';
+
+  const gotItBtn = document.createElement('button');
+  gotItBtn.className = 'btn-grade btn-grade--good';
+  gotItBtn.textContent = 'Got it';
+
+  const stillBtn = document.createElement('button');
+  stillBtn.className = 'btn-grade btn-grade--hard';
+  stillBtn.textContent = 'Still learning';
+
+  gradeRow.appendChild(gotItBtn);
+  gradeRow.appendChild(stillBtn);
+
+  container.addEventListener('click', () => {
+    if (inner.classList.contains('flipped')) return;
+    inner.classList.add('flipped');
+    setTimeout(() => gradeRow.classList.remove('hidden'), 420);
+  });
+
+  gotItBtn.addEventListener('click', () => {
+    recordAnswer('correct', [q.pose.id]);
+    setTimeout(handleContinue, 200);
+  });
+
+  stillBtn.addEventListener('click', () => {
+    recordAnswer('hard', [q.pose.id]);
+    setTimeout(handleContinue, 200);
+  });
+
+  grid.appendChild(container);
+  grid.appendChild(gradeRow);
+}
+
+// ── Type the English ──────────────────────────────────────────
+function setupTypeEnglish(q) {
+  qs('#question-label').textContent = 'What is the English name?';
+  qs('#question-text').textContent  = q.pose.sanskrit;
+
+  const grid = qs('#options-grid');
+  grid.innerHTML = '';
+  grid.className = 'options-grid options-grid--type';
+
+  const input = document.createElement('input');
+  input.type          = 'text';
+  input.className     = 'type-input';
+  input.placeholder   = 'Type the English name...';
+  input.autocomplete  = 'off';
+  input.autocorrect   = 'off';
+  input.spellcheck    = false;
+
+  const submitBtn = document.createElement('button');
+  submitBtn.className   = 'btn-primary btn-ember';
+  submitBtn.textContent = 'Check';
+  submitBtn.disabled    = true;
+
+  input.addEventListener('input', () => {
+    submitBtn.disabled = input.value.trim() === '';
+  });
+
+  const check = () => {
+    const val = input.value.trim();
+    if (!val) return;
+    input.disabled = true;
+    submitBtn.remove();
+    const targets = [q.pose.english, ...(q.pose.aliases || [])];
+    const correct = targets.some(t => fuzzyMatch(val, t));
+    recordAnswer(correct ? 'correct' : 'incorrect', [q.pose.id]);
+    showFeedback(correct ? 'correct' : 'wrong',
+      correct
+        ? randomFrom(CORRECT_COPY)
+        : 'The answer was <em>' + q.pose.english + '</em>'
+    );
+  };
+
+  submitBtn.addEventListener('click', check);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+
+  grid.appendChild(input);
+  grid.appendChild(submitBtn);
+
+  setTimeout(() => input.focus(), 80);
+}
+
+function fuzzyMatch(input, target) {
+  const norm = s => s.toLowerCase()
+    .replace(/[^a-z\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\s+pose$/, ''); // "Half Moon Pose" → "Half Moon"
+  const a = norm(input), b = norm(target);
+  if (a === b) return true;
+  // Allow 1-character difference for minor typos
+  if (Math.abs(a.length - b.length) > 2) return false;
+  return levenshtein(a, b) <= 1;
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+// ── Tile build ────────────────────────────────────────────────
+function setupTileBuild(q) {
+  qs('#question-label').textContent = 'Build the Sanskrit name';
+  qs('#question-text').textContent  = q.pose.english;
+
+  const grid = qs('#options-grid');
+  grid.innerHTML = '';
+  grid.className = 'options-grid options-grid--tilebuild';
+
+  const instruction = document.createElement('div');
+  instruction.className = 'tilebuild-instruction';
+  instruction.textContent = 'Tap tiles to build the name';
+
+  const answerZone = document.createElement('div');
+  answerZone.className = 'tilebuild-answer';
+
+  const bankZone = document.createElement('div');
+  bankZone.className = 'tilebuild-bank';
+
+  const checkBtn = document.createElement('button');
+  checkBtn.className = 'btn-primary btn-ember';
+  checkBtn.textContent = 'Check';
+  checkBtn.disabled = true;
+
+  let placedTiles = []; // { word, answerEl, bankGhost }
+  let answered = false;
+
+  const updateCheckBtn = () => {
+    checkBtn.disabled = placedTiles.length === 0;
+  };
+
+  const moveTileToAnswer = (word, bankGhost) => {
+    bankGhost.classList.add('ghost');
+    bankGhost.disabled = true;
+
+    const el = document.createElement('button');
+    el.className = 'build-tile build-tile--placed popping';
+    el.textContent = word;
+    el.addEventListener('animationend', () => el.classList.remove('popping'), { once: true });
+    el.addEventListener('click', () => {
+      if (answered) return;
+      moveTileToBank(el, bankGhost);
+    });
+    answerZone.appendChild(el);
+    placedTiles.push({ word, answerEl: el, bankGhost });
+    updateCheckBtn();
+  };
+
+  const moveTileToBank = (answerEl, bankGhost) => {
+    answerEl.remove();
+    placedTiles = placedTiles.filter(t => t.answerEl !== answerEl);
+    bankGhost.classList.remove('ghost');
+    bankGhost.disabled = false;
+    updateCheckBtn();
+  };
+
+  q.bankTiles.forEach(word => {
+    const el = document.createElement('button');
+    el.className = 'build-tile';
+    el.textContent = word;
+    el.addEventListener('click', () => {
+      if (answered || el.classList.contains('ghost')) return;
+      moveTileToAnswer(word, el);
+    });
+    bankZone.appendChild(el);
+  });
+
+  checkBtn.addEventListener('click', () => {
+    if (answered) return;
+    answered = true;
+
+    const answer  = placedTiles.map(t => t.word).join(' ');
+    const correct = answer === q.correctTiles.join(' ');
+
+    recordAnswer(correct ? 'correct' : 'incorrect', [q.pose.id]);
+    placedTiles.forEach((t, i) => {
+      t.answerEl.classList.add(t.word === q.correctTiles[i] ? 'correct' : 'wrong');
+    });
+    checkBtn.remove();
+
+    showFeedback(correct ? 'correct' : 'wrong',
+      correct
+        ? randomFrom(CORRECT_COPY)
+        : 'The answer was <em>' + q.correctTiles.join(' ') + '</em>'
+    );
+  });
+
+  grid.appendChild(instruction);
+  grid.appendChild(answerZone);
+  grid.appendChild(bankZone);
+  grid.appendChild(checkBtn);
+}
+
+// ── Matching pairs ────────────────────────────────────────────
+function setupMatchingPairs(q) {
+  qs('#question-label').textContent = 'Match each pose to its Sanskrit name';
+  qs('#question-label').style.marginBottom = '0';
+  qs('#question-text').textContent  = '';
+
+  const grid = qs('#options-grid');
+  grid.innerHTML = '';
+  grid.className = 'options-grid options-grid--matching';
+
+  const englishPoses  = shuffle([...q.poses]);
+  const sanskritPoses = shuffle([...q.poses]);
+
+  let selectedEnglishId = null;
+  const matchedIds      = new Set();
+
+  const tryMatch = (engId, sansPoseId) => {
+    const correct = engId === sansPoseId;
+    const engBtn  = grid.querySelector(`.matching-tile--english[data-pose-id="${engId}"]`);
+    const sansBtn = grid.querySelector(`.matching-tile--sanskrit[data-pose-id="${sansPoseId}"]`);
+
+    if (correct) {
+      matchedIds.add(engId);
+      engBtn.classList.remove('selected');
+      engBtn.classList.add('matched');
+      sansBtn.classList.add('matched');
+      engBtn.disabled  = true;
+      sansBtn.disabled = true;
+      selectedEnglishId = null;
+      if (matchedIds.size === q.poses.length) {
+        recordAnswer('correct', q.poses.map(p => p.id));
+        showFeedback('correct', 'All matched.');
+      }
+    } else {
+      engBtn.classList.add('wrong-flash');
+      sansBtn.classList.add('wrong-flash');
+      engBtn.disabled  = true;
+      sansBtn.disabled = true;
+      setTimeout(() => {
+        engBtn.classList.remove('wrong-flash', 'selected');
+        sansBtn.classList.remove('wrong-flash');
+        engBtn.disabled  = false;
+        sansBtn.disabled = false;
+        selectedEnglishId = null;
+      }, 500);
+    }
+  };
+
+  // Interleave into a single grid so each row shares height automatically
+  englishPoses.forEach((pose, i) => {
+    const engBtn = document.createElement('button');
+    engBtn.className     = 'matching-tile matching-tile--english';
+    engBtn.dataset.poseId = pose.id;
+    engBtn.textContent   = pose.english;
+    engBtn.addEventListener('click', () => {
+      if (matchedIds.has(pose.id)) return;
+      if (selectedEnglishId === pose.id) {
+        selectedEnglishId = null;
+        engBtn.classList.remove('selected');
+        return;
+      }
+      grid.querySelectorAll('.matching-tile--english').forEach(t => t.classList.remove('selected'));
+      selectedEnglishId = pose.id;
+      engBtn.classList.add('selected');
+    });
+
+    const sansBtn = document.createElement('button');
+    sansBtn.className     = 'matching-tile matching-tile--sanskrit';
+    sansBtn.dataset.poseId = sanskritPoses[i].id;
+    sansBtn.textContent   = sanskritPoses[i].sanskrit;
+    sansBtn.addEventListener('click', () => {
+      if (matchedIds.has(sanskritPoses[i].id) || !selectedEnglishId) return;
+      tryMatch(selectedEnglishId, sanskritPoses[i].id);
+    });
+
+    grid.appendChild(engBtn);
+    grid.appendChild(sansBtn);
+  });
+}
+
+// ── Shared feedback helper ────────────────────────────────────
+function showFeedback(type, message) {
   const fb     = qs('#feedback');
   const fbText = qs('#feedback-text');
-  const isEnToSa = q.direction === 'en-to-sa';
-
-  if (correct) {
-    fb.classList.add('correct');
-    fbText.innerHTML = '<span class="feedback-icon">' + ICON_CHECK + '</span>' + randomFrom(CORRECT_COPY);
-  } else {
-    fb.classList.add('wrong');
-    const rightAnswer = isEnToSa ? q.pose.sanskrit : q.pose.english;
-    fbText.innerHTML = '<span class="feedback-icon">' + ICON_X + '</span>The answer was <em>' + rightAnswer + '</em>';
-  }
-
-  fb.classList.add('visible');
+  fb.classList.add(type, 'visible');
+  const icon = type === 'correct' ? ICON_CHECK : ICON_X;
+  fbText.innerHTML = '<span class="feedback-icon">' + icon + '</span>' + message;
 }
 
 function handleContinue() {
   advanceSession();
 
   if (isSessionComplete()) {
+    if (maybeAppendRetries()) {
+      renderQuestion();
+      return;
+    }
     renderResult();
     showScreen('screen-result');
   } else if (shouldShowInsight()) {
@@ -253,7 +581,11 @@ function renderInsight() {
   qs('#insight-body').textContent    = insight.explanation;
 
   // Only chip poses that are actually in this session
-  const sessionPoseIds = new Set(session.questions.map(q => q.pose.id));
+  const sessionPoseIds = new Set(
+    session.questions.flatMap(q =>
+      q.type === 'matching-pairs' ? q.poses.map(p => p.id) : (q.pose ? [q.pose.id] : [])
+    )
+  );
   const posesEl = qs('#insight-poses');
   posesEl.innerHTML = '';
   insight.poseIds
@@ -278,18 +610,23 @@ function renderResult() {
   qs('#result-score').textContent = results.score + ' / ' + results.total;
 
   let msg = 'Every practice is progress.';
-  if (pct === 1)      msg = 'Perfect. A still mind recalls all.';
+  if (pct === 1)       msg = 'Perfect. A still mind recalls all.';
   else if (pct >= 0.8) msg = 'Well done. The heat is building.';
   else if (pct >= 0.6) msg = 'Good practice. Keep returning.';
   qs('#result-message').textContent = msg;
+
+  const streak = recordPractice();
+  qs('#result-streak').innerHTML =
+    '<span class="streak-icon">' + ICON_FLAME + '</span>' + streak + 'd streak';
 
   // Answer icons
   const dots = qs('#result-dots');
   dots.innerHTML = '';
   results.questions.forEach(q => {
+    const wasCorrect = q.answered === 'correct';
     const icon = document.createElement('span');
-    icon.className = 'result-icon ' + (q.answered ? 'correct' : 'wrong');
-    icon.innerHTML = q.answered ? ICON_CHECK : ICON_X;
+    icon.className = 'result-icon ' + (wasCorrect ? 'correct' : 'wrong');
+    icon.innerHTML = wasCorrect ? ICON_CHECK : ICON_X;
     dots.appendChild(icon);
   });
 }
