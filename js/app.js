@@ -13,6 +13,14 @@ const ICON_CARET_DOWN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25
   <path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/>
 </svg>`;
 
+const ICON_CARET_LEFT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+  <path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/>
+</svg>`;
+
+const ICON_CARET_RIGHT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+  <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/>
+</svg>`;
+
 const ICON_ARROWS_LR = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
   <path d="M246.63,128a8,8,0,0,1-2.35,5.65l-32,32a8,8,0,0,1-11.32-11.32L218.75,136H37.25l17.79,17.79A8,8,0,0,1,43.72,165.45l-32-32a8,8,0,0,1,0-11.32l32-32A8,8,0,0,1,55.04,101.66L37.25,120H218.75L200.96,102.21a8,8,0,0,1,11.32-11.32l32,32A8,8,0,0,1,246.63,128Z"/>
 </svg>`;
@@ -163,11 +171,12 @@ function startQuiz() {
 }
 
 function renderQuestion() {
-  const q    = getCurrentQuestion();
-  const prog = getSessionProgress();
+  const q = getCurrentQuestion();
 
-  // Progress bar
-  const pct = ((prog.current - 1) / prog.total) * 100;
+  // Progress bar — denominator grows as incorrect answers accumulate, making room for retries
+  const incorrectsSoFar = session.questions.filter(q => !q.isRetry && q.answered === 'incorrect' && q.pose).length;
+  const estimatedTotal  = session.mainTotal + Math.min(incorrectsSoFar, 3);
+  const pct = Math.min(((session.currentIndex + 1) / estimatedTotal) * 100, 100);
   qs('#progress-fill').style.width = pct + '%';
 
   // Reset feedback and label margin
@@ -333,6 +342,8 @@ function setupTypeEnglish(q) {
     const val = input.value.trim();
     if (!val) return;
     input.disabled = true;
+    input.blur();
+    window.scrollTo({ top: 0 });
     submitBtn.remove();
     const targets = [q.pose.english, ...(q.pose.aliases || [])];
     const correct = targets.some(t => fuzzyMatch(val, t));
@@ -559,6 +570,7 @@ function showFeedback(type, message) {
 }
 
 function handleContinue() {
+  document.activeElement?.blur();
   advanceSession();
 
   if (isSessionComplete()) {
@@ -640,6 +652,11 @@ function renderGlossary() {
   const body = qs('#glossary-body');
   body.innerHTML = '';
 
+  const hint = document.createElement('p');
+  hint.className = 'glossary-hint';
+  hint.textContent = 'Tap any pose to explore.';
+  body.appendChild(hint);
+
   const categories = [...new Set(POSES.map(p => p.category))];
 
   categories.forEach(cat => {
@@ -661,6 +678,7 @@ function renderGlossary() {
         <span class="glossary-english">${pose.english}${mastered ? '<span class="glossary-mastered-tick">' + ICON_CHECK + '</span>' : ''}</span>
         <span class="glossary-sanskrit">${pose.sanskrit}</span>
       `;
+      row.addEventListener('click', () => showPoseCard(pose));
       section.appendChild(row);
     });
 
@@ -709,6 +727,81 @@ function renderOnboardingSlide(animate) {
   }
 }
 
+// ── Pose card ─────────────────────────────────────────────────
+let _tiltHandler  = null;
+let _cardList     = POSES;
+let _cardIndex    = 0;
+let _touchStartX  = 0;
+
+function showPoseCard(pose) {
+  _cardList  = POSES;
+  _cardIndex = POSES.findIndex(p => p.id === pose.id);
+  _renderPoseCard();
+  qs('#pose-card-overlay').classList.add('visible');
+  _enableTilt();
+}
+
+function hidePoseCard() {
+  qs('#pose-card-overlay').classList.remove('visible');
+  _disableTilt();
+}
+
+function _renderPoseCard() {
+  const pose = _cardList[_cardIndex];
+  qs('#pose-card-category').textContent      = pose.category;
+  qs('#pose-card-sanskrit').textContent      = pose.sanskrit;
+  qs('#pose-card-english').textContent       = pose.english;
+  qs('#pose-card-pronunciation').textContent = pose.pronunciation || '';
+
+  const masteryEl = qs('#pose-card-mastery');
+  masteryEl.className = 'pose-card-mastery';
+  const filled = isNew(pose.id) ? 0 : Math.min(getLevel(pose.id), 3);
+  const mastered = isMastered(pose.id);
+  masteryEl.innerHTML = [0, 1, 2].map(i =>
+    `<span class="mastery-pip${i < filled ? ' mastery-pip--filled' : ''}"></span>`
+  ).join('');
+}
+
+function _navigatePoseCard(dir) {
+  const card = qs('#pose-card');
+  card.style.transition = 'opacity 0.1s ease';
+  card.style.opacity    = '0';
+  setTimeout(() => {
+    _cardIndex = (_cardIndex + dir + _cardList.length) % _cardList.length;
+    _renderPoseCard();
+    card.style.opacity = '1';
+  }, 110);
+}
+
+function _enableTilt() {
+  const card = qs('#pose-card');
+  const apply = () => {
+    _tiltHandler = (e) => {
+      const x = Math.max(-8, Math.min(8, (e.gamma || 0) * 0.12));
+      const y = Math.max(-8, Math.min(8, ((e.beta || 45) - 45) * 0.08));
+      card.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+    };
+    window.addEventListener('deviceorientation', _tiltHandler);
+  };
+
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    DeviceOrientationEvent.requestPermission()
+      .then(state => { if (state === 'granted') apply(); })
+      .catch(() => {});
+  } else if (window.DeviceOrientationEvent) {
+    apply();
+  }
+}
+
+function _disableTilt() {
+  if (_tiltHandler) {
+    window.removeEventListener('deviceorientation', _tiltHandler);
+    _tiltHandler = null;
+  }
+  qs('#pose-card').style.transform = '';
+}
+
 // ── Init ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   renderHome();
@@ -738,6 +831,19 @@ document.addEventListener('DOMContentLoaded', () => {
   qs('#home-btn').addEventListener('click', renderHome);
   qs('#glossary-link').addEventListener('click', renderGlossary);
   qs('#glossary-back-btn').addEventListener('click', renderHome);
+  qs('#pose-card-back').addEventListener('click', hidePoseCard);
+  qs('#pose-card-prev').innerHTML = ICON_CARET_LEFT;
+  qs('#pose-card-next').innerHTML = ICON_CARET_RIGHT;
+  qs('#pose-card-prev').addEventListener('click', () => _navigatePoseCard(-1));
+  qs('#pose-card-next').addEventListener('click', () => _navigatePoseCard(1));
+
+  const cardScene = qs('.pose-card-scene');
+  cardScene.addEventListener('touchstart', e => { _touchStartX = e.touches[0].clientX; }, { passive: true });
+  cardScene.addEventListener('touchend', e => {
+    const delta = e.changedTouches[0].clientX - _touchStartX;
+    if (Math.abs(delta) > 50) _navigatePoseCard(delta < 0 ? 1 : -1);
+  });
+
   qs('#glossary-back-btn').innerHTML = ICON_ARROW_LEFT;
 
   qs('#how-it-works-link').addEventListener('click', showOnboarding);
@@ -754,10 +860,4 @@ document.addEventListener('DOMContentLoaded', () => {
   // Show on first visit
   if (!localStorage.getItem(ONBOARDING_KEY)) showOnboarding();
 
-  qs('#reset-btn').addEventListener('click', () => {
-    selectedLength   = 10;
-    selectedCategory = null;
-    renderLengthPicker();
-    renderCategoryPills();
-  });
 });

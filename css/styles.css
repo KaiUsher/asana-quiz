@@ -18,6 +18,8 @@
 /* ── Reset ────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 button { font-family: inherit; cursor: pointer; }
+button:focus { outline: none; }
+button:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
 
 body {
   font-family: 'Jost', sans-serif;
@@ -452,7 +454,8 @@ body {
   justify-content: space-between;
   gap: 0.75rem;
 }
-.option-card:hover:not(:disabled) {
+.option-card:hover:not(:disabled),
+.option-card:focus-visible:not(:disabled) {
   border-color: var(--ember);
   border-left-color: var(--ember);
 }
@@ -672,7 +675,8 @@ body {
   font-size: 14px;
   font-style: italic;
 }
-.matching-tile:hover:not(:disabled):not(.matched) {
+.matching-tile:hover:not(:disabled):not(.matched),
+.matching-tile:focus-visible:not(:disabled):not(.matched) {
   border-color: var(--ember);
 }
 .matching-tile.selected {
@@ -1246,6 +1250,186 @@ body {
   color: var(--charcoal);
   text-align: right;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   POSE CARD
+═══════════════════════════════════════════════════════════ */
+.pose-card-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(28, 26, 24, 0.88);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+}
+
+.pose-card-overlay.visible {
+  display: flex;
+  animation: overlayFadeIn 0.25s ease forwards;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.pose-card-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 360px;
+  margin-bottom: 1.25rem;
+}
+
+.pose-card-back {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(245, 240, 232, 0.5);
+  background: none;
+  border: none;
+  padding: 0.25rem 0;
+  transition: color 0.15s;
+}
+
+.pose-card-back:hover { color: rgba(245, 240, 232, 0.85); }
+
+.pose-card-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  color: rgba(245, 240, 232, 0.45);
+  transition: color 0.15s;
+  padding: 0;
+}
+
+.pose-card-nav-btn svg { width: 20px; height: 20px; }
+.pose-card-nav-btn:hover { color: rgba(245, 240, 232, 0.85); }
+
+.pose-card-scene {
+  perspective: 900px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.pose-card {
+  width: 100%;
+  min-height: 380px;
+  background: var(--cream);
+  border-radius: 12px;
+  padding: 2.25rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.2);
+  transform-style: preserve-3d;
+  will-change: transform;
+  animation: cardRise 0.3s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+
+.pose-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+@keyframes cardRise {
+  from { opacity: 0; transform: scale(0.92) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.pose-card-category {
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--ash);
+  border: 1px solid var(--mid);
+  border-radius: 20px;
+  padding: 0.3rem 0.75rem;
+}
+
+.pose-card-sanskrit {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-style: italic;
+  font-size: 42px;
+  line-height: 1.1;
+  letter-spacing: 0.03em;
+  color: var(--charcoal);
+  margin-bottom: 0.5rem;
+}
+
+.pose-card-rule {
+  width: 28px;
+  height: 2px;
+  background: var(--ember);
+  border-radius: 1px;
+  margin-bottom: 1.5rem;
+}
+
+.pose-card-english {
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  color: var(--charcoal);
+}
+
+.pose-card-pronunciation {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ash);
+  letter-spacing: 0.04em;
+  margin-bottom: 1.75rem;
+}
+
+.pose-card-mastery {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.mastery-pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1.5px solid var(--mid);
+  background: transparent;
+}
+
+.mastery-pip--filled {
+  background: var(--ember);
+  border-color: var(--ember);
+}
+
+/* Glossary rows tappable */
+.glossary-hint {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ash);
+  text-align: center;
+  padding: 0.75rem 1.5rem 0rem;
+  margin: 0;
+  opacity: .5;
+}
+
+.glossary-row { cursor: pointer; }
+.glossary-row:hover { background: rgba(196, 99, 46, 0.04); }
 
 /* ── Mobile ───────────────────────────────────────────────── */
 @media (max-width: 380px) {
