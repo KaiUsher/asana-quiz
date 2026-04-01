@@ -24,13 +24,15 @@
         <div class="mastery-fraction">
           <span id="stat-mastered">0</span><span class="mastery-total" id="stat-total">&thinsp;/&thinsp;30</span>
         </div>
-        <div class="mastery-label">poses mastered</div>
+        <div class="mastery-label">poses mastered<span class="mastery-caret" id="mastery-caret"></span></div>
         <div class="mastery-bar-track">
           <div class="mastery-bar-practicing" id="mastery-bar-practicing"></div>
           <div class="mastery-bar-mastered" id="mastery-bar-mastered"></div>
         </div>
-        <div class="mastery-sub" id="mastery-sub"></div>
-        <div class="streak-row" id="streak-row"></div>
+        <div class="mastery-meta-row">
+          <div class="mastery-sub" id="mastery-sub"></div>
+          <div class="streak-row" id="streak-row"></div>
+        </div>
       </div>
 
       <button id="start-btn" class="btn-primary btn-ember">Begin Practice</button>
@@ -83,6 +85,15 @@
       <div class="glossary-header-title">Asana Glossary</div>
     </div>
     <div class="glossary-body" id="glossary-body"></div>
+  </div>
+
+  <!-- ── STATS ──────────────────────────────────────────────── -->
+  <div id="screen-stats" class="screen">
+    <div class="glossary-header">
+      <button id="stats-back-btn" class="quit-btn" aria-label="Back"></button>
+      <div class="glossary-header-title">Practice Stats</div>
+    </div>
+    <div class="stats-body" id="stats-body"></div>
   </div>
 
   <!-- ── QUIZ ────────────────────────────────────────────── -->
@@ -200,14 +211,21 @@
     </div>
     <div class="pose-card-scene">
       <div id="pose-card" class="pose-card">
-        <div class="pose-card-category" id="pose-card-category"></div>
-        <div class="pose-card-body">
-          <div class="pose-card-sanskrit" id="pose-card-sanskrit"></div>
-          <div class="pose-card-pronunciation" id="pose-card-pronunciation"></div>
-          <div class="pose-card-rule"></div>
-          <div class="pose-card-english" id="pose-card-english"></div>
+        <div class="pose-card-front">
+          <div class="pose-card-category" id="pose-card-category"></div>
+          <div class="pose-card-body">
+            <div class="pose-card-sanskrit" id="pose-card-sanskrit"></div>
+            <div class="pose-card-pronunciation" id="pose-card-pronunciation"></div>
+            <div class="pose-card-rule"></div>
+            <div class="pose-card-english" id="pose-card-english"></div>
+          </div>
+          <div class="pose-card-mastery" id="pose-card-mastery"></div>
+          <div class="pose-card-flip-hint" id="pose-card-flip-hint"></div>
         </div>
-        <div class="pose-card-mastery" id="pose-card-mastery"></div>
+        <div class="pose-card-back-face" id="pose-card-back-face">
+          <div class="pose-card-back-category" id="pose-card-back-category"></div>
+          <p class="pose-card-description" id="pose-card-description"></p>
+        </div>
       </div>
     </div>
   </div>

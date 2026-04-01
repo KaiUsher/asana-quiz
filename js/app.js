@@ -58,6 +58,10 @@ const ICON_FLAME = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256
   <path d="M183.89,153.34a57.6,57.6,0,0,1-46.56,46.55A8.75,8.75,0,0,1,136,200a8,8,0,0,1-1.32-15.89c16.57-2.79,30.63-16.85,33.44-33.45a8,8,0,0,1,15.78,2.68ZM216,144a88,88,0,0,1-176,0c0-27.92,11-56.47,32.66-84.85a8,8,0,0,1,11.93-.89l24.12,23.41,22-60.41a8,8,0,0,1,12.63-3.41C165.21,36,216,84.55,216,144Zm-16,0c0-46.09-35.79-85.92-58.21-106.33L119.52,98.74a8,8,0,0,1-13.09,3L80.06,76.16C64.09,99.21,56,122,56,144a72,72,0,0,0,144,0Z"/>
 </svg>`;
 
+const ICON_BRAIN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+  <path d="M248,124a56.11,56.11,0,0,0-32-50.61V72a48,48,0,0,0-88-26.49A48,48,0,0,0,40,72v1.39a56,56,0,0,0,0,101.2V176a48,48,0,0,0,88,26.49A48,48,0,0,0,216,176v-1.41A56.09,56.09,0,0,0,248,124ZM88,208a32,32,0,0,1-31.81-28.56A55.87,55.87,0,0,0,64,180h8a8,8,0,0,0,0-16H64A40,40,0,0,1,50.67,86.27,8,8,0,0,0,56,78.73V72a32,32,0,0,1,64,0v68.26A47.8,47.8,0,0,0,88,128a8,8,0,0,0,0,16,32,32,0,0,1,0,64Zm104-44h-8a8,8,0,0,0,0,16h8a55.87,55.87,0,0,0,7.81-.56A32,32,0,1,1,168,144a8,8,0,0,0,0-16,47.8,47.8,0,0,0-32,12.26V72a32,32,0,0,1,64,0v6.73a8,8,0,0,0,5.33,7.54A40,40,0,0,1,192,164Zm16-52a8,8,0,0,1-8,8h-4a36,36,0,0,1-36-36V80a8,8,0,0,1,16,0v4a20,20,0,0,0,20,20h4A8,8,0,0,1,208,112ZM60,120H56a8,8,0,0,1,0-16h4A20,20,0,0,0,80,84V80a8,8,0,0,1,16,0v4A36,36,0,0,1,60,120Z"/>
+</svg>`;
+
 const ICON_SLIDERS = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
   <path d="M40,88H73a32,32,0,0,0,62,0h81a8,8,0,0,0,0-16H135a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16Zm64-24a16,16,0,1,1-16,16A16,16,0,0,1,104,64ZM216,168H183a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16h81a32,32,0,0,0,62,0h33a8,8,0,0,0,0-16Zm-64,24a16,16,0,1,1,16-16A16,16,0,0,1,152,192Z"/>
 </svg>`;
@@ -83,7 +87,7 @@ const SLIDES = [
     body: 'Halfway through each session a Sanskrit root card appears - unpacking the building blocks that run through multiple pose names.',
   },
   {
-    icon: ICON_FLAME,
+    icon: ICON_BRAIN,
     heading: 'Building mastery',
     body: 'A pose is mastered once recalled correctly across multiple sessions. Watch the progress bar on the home screen fill over time.',
   },
@@ -812,6 +816,173 @@ function renderGlossary() {
   showScreen('screen-glossary');
 }
 
+// ── Stats ─────────────────────────────────────────────────────
+function renderStatsScreen() {
+  const body = qs('#stats-body');
+  body.innerHTML = '';
+
+  const stats = getStats();
+  const { total, masteredCount, practicingCount, dueCount } = stats;
+  const newCount      = total - masteredCount - practicingCount;
+  const masteredPct   = masteredCount / total * 100;
+  const practicingPct = (masteredCount + practicingCount) / total * 100;
+
+  const fmtDays = n => n > 0 ? n + ' day' + (n !== 1 ? 's' : '') : '—';
+
+  // ── Overview ──
+  const overviewSection = document.createElement('div');
+  overviewSection.className = 'stats-section';
+  overviewSection.innerHTML = `
+    <div class="mastery-fraction">
+      <span>${masteredCount}</span><span class="mastery-total">&thinsp;/&thinsp;${total}</span>
+    </div>
+    <div class="mastery-label">poses mastered</div>
+    <div class="mastery-bar-track">
+      <div class="mastery-bar-practicing" style="width:${practicingPct}%"></div>
+      <div class="mastery-bar-mastered" style="width:${masteredPct}%"></div>
+    </div>
+    <div class="mastery-sub">
+      ${masteredCount} mastered&ensp;&middot;&ensp;${practicingCount} in progress&ensp;&middot;&ensp;${newCount} new
+    </div>
+  `;
+  body.appendChild(overviewSection);
+
+  // ── Due for review ──
+  const duePoses = POSES
+    .filter(p => isDue(p.id))
+    .sort((a, b) => getCardData(a.id).nextReview - getCardData(b.id).nextReview);
+
+  if (duePoses.length > 0) {
+    const dueSection = document.createElement('div');
+    dueSection.className = 'stats-section';
+    dueSection.innerHTML = '<div class="stats-section-label">Due for review</div>';
+    duePoses.forEach(pose => {
+      const row = document.createElement('div');
+      row.className = 'stats-row';
+      row.innerHTML = `
+        <span class="stats-row-label">${pose.english}</span>
+        <span class="stats-row-value stats-row-sanskrit">${pose.sanskrit}</span>
+      `;
+      dueSection.appendChild(row);
+    });
+    body.appendChild(dueSection);
+  }
+
+  // ── Weakest poses ──
+  // Require at least 3 attempts to filter out noise; sort by accuracy rate ascending
+  const weakPoses = POSES
+    .map(p => ({ pose: p, card: getCardData(p.id) }))
+    .filter(({ card }) => card.totalSeen >= 3)
+    .sort((a, b) => {
+      const rateA = a.card.totalCorrect / a.card.totalSeen;
+      const rateB = b.card.totalCorrect / b.card.totalSeen;
+      return rateA - rateB;
+    })
+    .slice(0, 5);
+
+  if (weakPoses.length > 0) {
+    const weakSection = document.createElement('div');
+    weakSection.className = 'stats-section';
+    weakSection.innerHTML = '<div class="stats-section-label">Weakest poses</div>';
+    weakPoses.forEach(({ pose }) => {
+      const row = document.createElement('div');
+      row.className = 'glossary-row';
+      row.innerHTML = `
+        <span class="glossary-english">${pose.english}</span>
+        <span class="glossary-sanskrit">${pose.sanskrit}</span>
+      `;
+      row.addEventListener('click', () => showPoseCard(pose));
+      weakSection.appendChild(row);
+    });
+    body.appendChild(weakSection);
+  }
+
+  // ── Streak ──
+  const streakInfo = getStreakInfo();
+  let lastPracticeText = '—';
+  if (streakInfo.lastPracticeDate) {
+    const today     = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+    if      (streakInfo.lastPracticeDate === today)     lastPracticeText = 'Today';
+    else if (streakInfo.lastPracticeDate === yesterday) lastPracticeText = 'Yesterday';
+    else                                                lastPracticeText = streakInfo.lastPracticeDate;
+  }
+
+  const streakSection = document.createElement('div');
+  streakSection.className = 'stats-section';
+  streakSection.innerHTML = `
+    <div class="stats-section-label">Streak</div>
+    <div class="stats-row">
+      <span class="stats-row-label">Current streak</span>
+      <span class="stats-row-value stats-row-streak"><span class="streak-icon">${ICON_FLAME}</span>${fmtDays(streakInfo.currentStreak)}</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-row-label">Longest streak</span>
+      <span class="stats-row-value stats-row-streak"><span class="streak-icon">${ICON_FLAME}</span>${fmtDays(streakInfo.longestStreak)}</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-row-label">Last practice</span>
+      <span class="stats-row-value">${lastPracticeText}</span>
+    </div>
+  `;
+  body.appendChild(streakSection);
+
+  // ── Accuracy ──
+  const seenCards = POSES.map(p => getCardData(p.id)).filter(c => c.totalSeen > 0);
+  if (seenCards.length > 0) {
+    const totalSeen    = seenCards.reduce((s, c) => s + c.totalSeen, 0);
+    const totalCorrect = seenCards.reduce((s, c) => s + c.totalCorrect, 0);
+    const pct = Math.round(totalCorrect / totalSeen * 100);
+
+    const accSection = document.createElement('div');
+    accSection.className = 'stats-section';
+    accSection.innerHTML = `
+      <div class="stats-section-label">Accuracy</div>
+      <div class="stats-row">
+        <span class="stats-row-label">Total answers</span>
+        <span class="stats-row-value">${totalSeen}</span>
+      </div>
+      <div class="stats-row">
+        <span class="stats-row-label">Correct answers</span>
+        <span class="stats-row-value">${pct}%</span>
+      </div>
+    `;
+    body.appendChild(accSection);
+  }
+
+  // ── By category ──
+  const categories = [...new Set(POSES.map(p => p.category))];
+  const catSection = document.createElement('div');
+  catSection.className = 'stats-section';
+  catSection.innerHTML = '<div class="stats-section-label">Mastery by category</div>';
+
+  categories.forEach(cat => {
+    const catPoses      = POSES.filter(p => p.category === cat);
+    const catMastered   = catPoses.filter(p => isMastered(p.id)).length;
+    const catPracticing = catPoses.filter(p => !isNew(p.id) && !isMastered(p.id)).length;
+    const catTotal      = catPoses.length;
+    const catMasteredPct   = catMastered / catTotal * 100;
+    const catPracticingPct = (catMastered + catPracticing) / catTotal * 100;
+
+    const row = document.createElement('div');
+    row.className = 'stats-cat-row';
+    row.innerHTML = `
+      <div class="stats-cat-header">
+        <span class="stats-cat-name">${cat}</span>
+        <span class="stats-cat-count">${catMastered} / ${catTotal}</span>
+      </div>
+      <div class="mastery-bar-track">
+        <div class="mastery-bar-practicing" style="width:${catPracticingPct}%"></div>
+        <div class="mastery-bar-mastered" style="width:${catMasteredPct}%"></div>
+      </div>
+    `;
+    catSection.appendChild(row);
+  });
+  body.appendChild(catSection);
+
+  showScreen('screen-stats');
+}
+
 // ── Onboarding ────────────────────────────────────────────────
 function showOnboarding() {
   currentSlide = 0;
@@ -871,6 +1042,11 @@ function hidePoseCard() {
 
 function _renderPoseCard() {
   const pose = _cardList[_cardIndex];
+  const card = qs('#pose-card');
+
+  card.classList.remove('flipped');
+  card.classList.toggle('has-description', !!pose.description);
+
   qs('#pose-card-category').textContent      = pose.category;
   qs('#pose-card-sanskrit').textContent      = pose.sanskrit;
   qs('#pose-card-english').textContent       = pose.english;
@@ -879,21 +1055,27 @@ function _renderPoseCard() {
   const masteryEl = qs('#pose-card-mastery');
   masteryEl.className = 'pose-card-mastery';
   const filled = isNew(pose.id) ? 0 : Math.min(getLevel(pose.id), 3);
-  const mastered = isMastered(pose.id);
   masteryEl.innerHTML = [0, 1, 2].map(i =>
     `<span class="mastery-pip${i < filled ? ' mastery-pip--filled' : ''}"></span>`
   ).join('');
+
+  qs('#pose-card-flip-hint').textContent = '';
+
+  qs('#pose-card-back-category').textContent = pose.sanskrit;
+  qs('#pose-card-description').textContent   = pose.description || '';
 }
 
 function _navigatePoseCard(dir) {
   const card = qs('#pose-card');
-  card.style.transition = 'opacity 0.1s ease';
-  card.style.opacity    = '0';
-  setTimeout(() => {
-    _cardIndex = (_cardIndex + dir + _cardList.length) % _cardList.length;
-    _renderPoseCard();
-    card.style.opacity = '1';
-  }, 110);
+  card.style.transition = 'none';
+  card.classList.remove('flipped');
+  _cardIndex = (_cardIndex + dir + _cardList.length) % _cardList.length;
+  _renderPoseCard();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      card.style.transition = '';
+    });
+  });
 }
 
 
@@ -937,17 +1119,36 @@ document.addEventListener('DOMContentLoaded', () => {
   qs('#milestone-continue-btn').addEventListener('click', advanceEndFlow);
   qs('#glossary-link').addEventListener('click', renderGlossary);
   qs('#glossary-back-btn').addEventListener('click', renderHome);
+  qs('#stats-back-btn').addEventListener('click', renderHome);
+  qs('#stats-back-btn').innerHTML = ICON_ARROW_LEFT;
+  qs('#mastery-caret').innerHTML = ICON_CARET_RIGHT;
+  qs('.mastery-block').addEventListener('click', renderStatsScreen);
   qs('#pose-card-back').addEventListener('click', hidePoseCard);
   qs('#pose-card-prev').innerHTML = ICON_CARET_LEFT;
   qs('#pose-card-next').innerHTML = ICON_CARET_RIGHT;
   qs('#pose-card-prev').addEventListener('click', () => _navigatePoseCard(-1));
   qs('#pose-card-next').addEventListener('click', () => _navigatePoseCard(1));
 
+  let _touchDidFlip = false;
   const cardScene = qs('.pose-card-scene');
   cardScene.addEventListener('touchstart', e => { _touchStartX = e.touches[0].clientX; }, { passive: true });
   cardScene.addEventListener('touchend', e => {
     const delta = e.changedTouches[0].clientX - _touchStartX;
-    if (Math.abs(delta) > 50) _navigatePoseCard(delta < 0 ? 1 : -1);
+    if (Math.abs(delta) > 50) {
+      _navigatePoseCard(delta < 0 ? 1 : -1);
+    } else if (Math.abs(delta) < 10) {
+      const card = qs('#pose-card');
+      if (card.classList.contains('has-description')) {
+        card.classList.toggle('flipped');
+        _touchDidFlip = true;
+        setTimeout(() => { _touchDidFlip = false; }, 400);
+      }
+    }
+  });
+  qs('#pose-card').addEventListener('click', () => {
+    if (_touchDidFlip) return;
+    const card = qs('#pose-card');
+    if (card.classList.contains('has-description')) card.classList.toggle('flipped');
   });
 
   qs('#glossary-back-btn').innerHTML = ICON_ARROW_LEFT;

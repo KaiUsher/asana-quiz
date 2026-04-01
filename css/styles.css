@@ -129,6 +129,18 @@ body.dark-bg { background: var(--charcoal); }
   border-bottom: 0.5px solid var(--mid);
 }
 
+.mastery-caret {
+  color: var(--mid);
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.mastery-caret svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
 .mastery-fraction {
   font-family: 'Cormorant Garamond', serif;
   font-weight: 300;
@@ -144,6 +156,9 @@ body.dark-bg { background: var(--charcoal); }
 }
 
 .mastery-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-size: 10px;
   font-weight: 400;
   letter-spacing: 0.25em;
@@ -175,13 +190,19 @@ body.dark-bg { background: var(--charcoal); }
 .mastery-bar-practicing { background: #ddb99a; } /* muted ember — practicing */
 .mastery-bar-mastered   { background: var(--ember); } /* full ember — mastered */
 
+.mastery-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.6rem;
+  min-height: 1rem;
+}
+
 .mastery-sub {
   font-size: 11px;
   font-weight: 300;
   letter-spacing: 0.05em;
   color: var(--ash);
-  margin-top: 0.6rem;
-  min-height: 1rem;
 }
 .mastery-sub.has-due { color: var(--ember); }
 
@@ -189,12 +210,10 @@ body.dark-bg { background: var(--charcoal); }
   display: flex;
   align-items: center;
   gap: 5px;
-  margin-top: 0.6rem;
   font-size: 11px;
   font-weight: 400;
   letter-spacing: 0.08em;
   color: var(--ash);
-  min-height: 1rem;
 }
 .streak-icon {
   display: flex;
@@ -1489,20 +1508,69 @@ body.dark-bg { background: var(--charcoal); }
 }
 
 .pose-card {
+  position: relative;
   width: 100%;
   min-height: 380px;
-  background: var(--cream);
   border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.2);
+  transform-style: preserve-3d;
+  transition: transform 0.45s ease;
+  cursor: default;
+}
+
+.pose-card.has-description { cursor: pointer; }
+.pose-card.flipped { transform: rotateY(180deg); }
+
+.pose-card-front,
+.pose-card-back-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: var(--cream);
   padding: 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   text-align: center;
-  box-shadow: 0 24px 60px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.2);
-  transform-style: preserve-3d;
-  will-change: transform;
-  animation: cardRise 0.3s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+
+.pose-card-back-face {
+  transform: rotateY(180deg);
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.pose-card-back-category {
+  font-family: 'Jost', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  color: var(--ash);
+}
+
+.pose-card-description {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1.55;
+  color: var(--charcoal);
+  letter-spacing: 0.01em;
+  margin: 0;
+  padding: 0 0.25rem;
+}
+
+.pose-card-flip-hint {
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--mid);
+  min-height: 1em;
 }
 
 .pose-card-body {
@@ -1598,6 +1666,105 @@ body.dark-bg { background: var(--charcoal); }
 
 .glossary-row { cursor: pointer; }
 .glossary-row:hover { background: rgba(196, 99, 46, 0.04); }
+
+/* ═══════════════════════════════════════════════════════════
+   STATS SCREEN
+═══════════════════════════════════════════════════════════ */
+#screen-stats { background: var(--light); }
+
+.stats-body {
+  flex: 1;
+  overflow-y: auto;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+}
+
+.stats-section {
+  margin-top: 2rem;
+}
+
+.stats-section:first-child {
+  padding-bottom: 0.5rem;
+}
+
+.stats-section .mastery-sub {
+  margin-top: 0.6rem;
+}
+
+.stats-section-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ash);
+  padding-bottom: 0.6rem;
+  border-bottom: 0.5px solid var(--mid);
+  margin-bottom: 0;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.75rem 0;
+  border-bottom: 0.5px solid var(--mid);
+}
+
+.stats-row-label {
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: var(--warm);
+}
+
+.stats-row-value {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ash);
+}
+
+.stats-row-streak {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.stats-row-sanskrit {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--charcoal);
+}
+
+.stats-cat-row {
+  padding: 0.85rem 0;
+  border-bottom: 0.5px solid var(--mid);
+}
+
+.stats-cat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+
+.stats-cat-name {
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: var(--warm);
+}
+
+.stats-cat-count {
+  font-size: 12px;
+  color: var(--ash);
+}
+
+/* Mastery block on home is tappable */
+.mastery-block { cursor: pointer; }
 
 /* ── Mobile ───────────────────────────────────────────────── */
 @media (max-width: 380px) {

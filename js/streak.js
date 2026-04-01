@@ -57,3 +57,12 @@ function acknowledgeStreakMilestone(n) {
   data.lastMilestoneShown = n;
   localStorage.setItem(STREAK_KEY, JSON.stringify(data));
 }
+
+function getStreakInfo() {
+  const data = _getStreakData();
+  return {
+    currentStreak:    data.currentStreak    || 0,
+    longestStreak:    data.longestStreak    || 0,
+    lastPracticeDate: data.lastPracticeDate || null,
+  };
+}
