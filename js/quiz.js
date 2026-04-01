@@ -109,6 +109,7 @@ function buildSession(categoryFilter, sessionLength) {
     insightShown: false,
     pool,
     retriesAppended: false,
+    newlyMastered: [],
   };
 }
 
@@ -127,8 +128,18 @@ function recordAnswer(grade, poseIds) {
   q.answered = grade;
   if (grade === 'correct') session.score++;
   if (!q.isRetry) {
-    poseIds.forEach(id => updateCard(id, grade));
+    poseIds.forEach(id => {
+      const wasMastered = isMastered(id);
+      updateCard(id, grade);
+      if (!wasMastered && isMastered(id)) session.newlyMastered.push(id);
+    });
   }
+}
+
+function getNewlyMasteredPoses() {
+  return session.newlyMastered
+    .map(id => POSES.find(p => p.id === id))
+    .filter(Boolean);
 }
 
 function maybeAppendRetries() {

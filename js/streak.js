@@ -1,4 +1,5 @@
 const STREAK_KEY = 'asana_streak_v1';
+const STREAK_MILESTONES = [1, 3, 7, 14, 30, 50, 100];
 
 function _getStreakData() {
   try { return JSON.parse(localStorage.getItem(STREAK_KEY)) || {}; }
@@ -32,11 +33,27 @@ function recordPractice() {
   if (data.lastPracticeDate === _yesterday()) {
     data.currentStreak = (data.currentStreak || 1) + 1;
   } else {
-    data.currentStreak = 1; // gap or first session
+    data.currentStreak    = 1; // gap or first session
+    data.lastMilestoneShown = 0; // reset so milestones fire again on the new run
   }
 
   data.lastPracticeDate = today;
   data.longestStreak    = Math.max(data.currentStreak, data.longestStreak || 0);
   localStorage.setItem(STREAK_KEY, JSON.stringify(data));
   return data.currentStreak;
+}
+
+// Returns the highest unacknowledged milestone the current streak has reached,
+// or null if none. Milestones reset when the streak resets.
+function getStreakMilestoneToShow(currentStreak) {
+  const data = _getStreakData();
+  const last = data.lastMilestoneShown || 0;
+  const hit  = STREAK_MILESTONES.filter(m => m <= currentStreak && m > last);
+  return hit.length > 0 ? Math.max(...hit) : null;
+}
+
+function acknowledgeStreakMilestone(n) {
+  const data = _getStreakData();
+  data.lastMilestoneShown = n;
+  localStorage.setItem(STREAK_KEY, JSON.stringify(data));
 }

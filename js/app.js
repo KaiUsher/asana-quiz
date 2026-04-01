@@ -4,6 +4,27 @@ let selectedLength   = 10;
 const ONBOARDING_KEY = 'asana_onboarding_seen';
 let currentSlide = 0;
 
+// ── End-session flow ──────────────────────────────────────────
+let endFlow = [];
+
+function advanceEndFlow() {
+  if (endFlow.length > 0) {
+    endFlow.shift()();
+  } else {
+    renderHome();
+  }
+}
+
+const STREAK_MILESTONE_COPY = {
+  1:   'The first day. Keep coming back.',
+  3:   'A habit is forming.',
+  7:   'One week. The practice is taking root.',
+  14:  'A fortnight of returning.',
+  30:  'Thirty days. This is yours now.',
+  50:  'Fifty days of showing up.',
+  100: 'One hundred days. A genuine practice.',
+};
+
 // ── Icons (Phosphor SVG paths, inline for reliability) ────────
 const ICON_ARROW_LEFT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
   <path d="M224,128a8,8,0,0,1-8,8H59.31l58.35,58.34a8,8,0,0,1-11.32,11.32l-72-72a8,8,0,0,1,0-11.32l72-72a8,8,0,0,1,11.32,11.32L59.31,120H216A8,8,0,0,1,224,128Z"/>
@@ -88,6 +109,7 @@ function showScreen(id) {
 
 // ── Home ─────────────────────────────────────────────────────
 function renderHome() {
+  document.body.classList.remove('dark-bg');
   renderStats();
   renderStreak();
   renderLengthPicker();
@@ -493,22 +515,29 @@ function setupMatchingPairs(q) {
   const englishPoses  = shuffle([...q.poses]);
   const sanskritPoses = shuffle([...q.poses]);
 
-  let selectedEnglishId = null;
-  const matchedIds      = new Set();
+  let selectedId   = null;
+  let selectedSide = null; // 'english' | 'sanskrit'
+  const matchedIds = new Set();
 
-  const tryMatch = (engId, sansPoseId) => {
-    const correct = engId === sansPoseId;
+  const clearSelection = () => {
+    grid.querySelectorAll('.matching-tile').forEach(t => t.classList.remove('selected'));
+    selectedId   = null;
+    selectedSide = null;
+  };
+
+  const tryMatch = (engId, sansId) => {
+    const correct = engId === sansId;
     const engBtn  = grid.querySelector(`.matching-tile--english[data-pose-id="${engId}"]`);
-    const sansBtn = grid.querySelector(`.matching-tile--sanskrit[data-pose-id="${sansPoseId}"]`);
+    const sansBtn = grid.querySelector(`.matching-tile--sanskrit[data-pose-id="${sansId}"]`);
+
+    clearSelection();
 
     if (correct) {
       matchedIds.add(engId);
-      engBtn.classList.remove('selected');
       engBtn.classList.add('matched');
       sansBtn.classList.add('matched');
       engBtn.disabled  = true;
       sansBtn.disabled = true;
-      selectedEnglishId = null;
       if (matchedIds.size === q.poses.length) {
         recordAnswer('correct', q.poses.map(p => p.id));
         showFeedback('correct', 'All matched.');
@@ -519,11 +548,10 @@ function setupMatchingPairs(q) {
       engBtn.disabled  = true;
       sansBtn.disabled = true;
       setTimeout(() => {
-        engBtn.classList.remove('wrong-flash', 'selected');
+        engBtn.classList.remove('wrong-flash');
         sansBtn.classList.remove('wrong-flash');
         engBtn.disabled  = false;
         sansBtn.disabled = false;
-        selectedEnglishId = null;
       }, 500);
     }
   };
@@ -531,28 +559,38 @@ function setupMatchingPairs(q) {
   // Interleave into a single grid so each row shares height automatically
   englishPoses.forEach((pose, i) => {
     const engBtn = document.createElement('button');
-    engBtn.className     = 'matching-tile matching-tile--english';
+    engBtn.className      = 'matching-tile matching-tile--english';
     engBtn.dataset.poseId = pose.id;
-    engBtn.textContent   = pose.english;
+    engBtn.textContent    = pose.english;
     engBtn.addEventListener('click', () => {
       if (matchedIds.has(pose.id)) return;
-      if (selectedEnglishId === pose.id) {
-        selectedEnglishId = null;
-        engBtn.classList.remove('selected');
+      if (selectedSide === 'sanskrit') {
+        tryMatch(pose.id, selectedId);
         return;
       }
-      grid.querySelectorAll('.matching-tile--english').forEach(t => t.classList.remove('selected'));
-      selectedEnglishId = pose.id;
+      if (selectedId === pose.id) { clearSelection(); return; }
+      clearSelection();
+      selectedId   = pose.id;
+      selectedSide = 'english';
       engBtn.classList.add('selected');
     });
 
     const sansBtn = document.createElement('button');
-    sansBtn.className     = 'matching-tile matching-tile--sanskrit';
+    sansBtn.className      = 'matching-tile matching-tile--sanskrit';
     sansBtn.dataset.poseId = sanskritPoses[i].id;
-    sansBtn.textContent   = sanskritPoses[i].sanskrit;
+    sansBtn.textContent    = sanskritPoses[i].sanskrit;
     sansBtn.addEventListener('click', () => {
-      if (matchedIds.has(sanskritPoses[i].id) || !selectedEnglishId) return;
-      tryMatch(selectedEnglishId, sanskritPoses[i].id);
+      const thisPoseId = sanskritPoses[i].id;
+      if (matchedIds.has(thisPoseId)) return;
+      if (selectedSide === 'english') {
+        tryMatch(selectedId, thisPoseId);
+        return;
+      }
+      if (selectedId === thisPoseId) { clearSelection(); return; }
+      clearSelection();
+      selectedId   = thisPoseId;
+      selectedSide = 'sanskrit';
+      sansBtn.classList.add('selected');
     });
 
     grid.appendChild(engBtn);
@@ -576,15 +614,23 @@ function handleContinue() {
   if (isSessionComplete()) {
     if (maybeAppendRetries()) {
       renderQuestion();
+      setTimeout(() => { document.activeElement?.blur(); }, 0);
       return;
     }
-    renderResult();
-    showScreen('screen-result');
+    document.body.classList.add('dark-bg');
+    const quizScreen = qs('#screen-quiz');
+    quizScreen.classList.add('exiting');
+    setTimeout(() => {
+      quizScreen.classList.remove('exiting');
+      renderResult();
+      showScreen('screen-result');
+    }, 250);
   } else if (shouldShowInsight()) {
     markInsightShown();
     renderInsight();
   } else {
     renderQuestion();
+    setTimeout(() => { document.activeElement?.blur(); }, 0);
   }
 }
 
@@ -635,6 +681,13 @@ function renderResult() {
   qs('#result-streak').innerHTML =
     '<span class="streak-icon">' + ICON_FLAME + '</span>' + streak + 'd streak';
 
+  // Build the end-session flow queue
+  endFlow = [];
+  const newlyMastered = getNewlyMasteredPoses();
+  if (newlyMastered.length > 0) endFlow.push(() => renderMasterySummary(newlyMastered));
+  const milestone = getStreakMilestoneToShow(streak);
+  if (milestone) endFlow.push(() => renderStreakMilestone(milestone));
+
   // Answer icons
   const dots = qs('#result-dots');
   dots.innerHTML = '';
@@ -645,6 +698,77 @@ function renderResult() {
     icon.innerHTML = wasCorrect ? ICON_CHECK : ICON_X;
     dots.appendChild(icon);
   });
+}
+
+// ── Mastery summary ───────────────────────────────────────────
+let _msPoses   = [];
+let _msIndex   = 0;
+let _msViewed  = new Set();
+let _msTouchX  = 0;
+
+function renderMasterySummary(poses) {
+  _msPoses  = poses;
+  _msIndex  = 0;
+  _msViewed = new Set();
+
+  const count = poses.length;
+  qs('#mastery-summary-count').textContent = String(count);
+  qs('#mastery-summary-nav').style.display = count > 1 ? '' : 'none';
+
+  _renderMasterySummaryCard(true);
+  showScreen('screen-mastery-summary');
+}
+
+function _renderMasterySummaryCard(animate) {
+  const pose         = _msPoses[_msIndex];
+  const alreadySeen  = _msViewed.has(_msIndex);
+  const shouldAnimate = animate && !alreadySeen;
+
+  qs('#msc-category').textContent      = pose.category;
+  qs('#msc-sanskrit').textContent      = pose.sanskrit;
+  qs('#msc-english').textContent       = pose.english;
+  qs('#msc-pronunciation').textContent = pose.pronunciation || '';
+
+  qs('#mastery-summary-counter').textContent =
+    _msPoses.length > 1 ? (_msIndex + 1) + ' / ' + _msPoses.length : '';
+
+  // Render pips: first two filled, third unfilled initially if animating
+  const masteryEl = qs('#msc-mastery');
+  masteryEl.innerHTML = [0, 1, 2].map(i =>
+    `<span class="mastery-pip${(i < 2 || !shouldAnimate) ? ' mastery-pip--filled' : ''}"></span>`
+  ).join('');
+
+  if (shouldAnimate) {
+    _msViewed.add(_msIndex);
+    const capturedIndex = _msIndex;
+    setTimeout(() => {
+      if (_msIndex === capturedIndex) {
+        const pip = qs('#msc-mastery').querySelectorAll('.mastery-pip')[2];
+        if (pip) pip.classList.add('mastery-pip--filled');
+      }
+    }, 450);
+  }
+}
+
+function _navigateMasterySummary(dir) {
+  const card = qs('#mastery-summary-card');
+  card.style.transition = 'opacity 0.1s ease';
+  card.style.opacity    = '0';
+  setTimeout(() => {
+    _msIndex = (_msIndex + dir + _msPoses.length) % _msPoses.length;
+    _renderMasterySummaryCard(true);
+    card.style.opacity = '1';
+  }, 110);
+}
+
+// ── Streak milestone ──────────────────────────────────────────
+function renderStreakMilestone(n) {
+  acknowledgeStreakMilestone(n);
+  qs('#milestone-icon').innerHTML     = ICON_FLAME;
+  qs('#milestone-number').textContent = n;
+  qs('#milestone-label').textContent  = n === 1 ? 'day in a row' : 'days in a row';
+  qs('#milestone-copy').textContent   = STREAK_MILESTONE_COPY[n] || '';
+  showScreen('screen-streak-milestone');
 }
 
 // ── Glossary ──────────────────────────────────────────────────
@@ -798,8 +922,19 @@ document.addEventListener('DOMContentLoaded', () => {
       showScreen('screen-quiz');
     }, 320);
   });
-  qs('#again-btn').addEventListener('click', startQuiz);
-  qs('#home-btn').addEventListener('click', renderHome);
+  qs('#end-continue-btn').addEventListener('click', advanceEndFlow);
+  qs('#mastery-summary-continue').addEventListener('click', advanceEndFlow);
+  qs('#mastery-summary-prev').innerHTML = ICON_CARET_LEFT;
+  qs('#mastery-summary-next').innerHTML = ICON_CARET_RIGHT;
+  qs('#mastery-summary-prev').addEventListener('click', () => _navigateMasterySummary(-1));
+  qs('#mastery-summary-next').addEventListener('click', () => _navigateMasterySummary(1));
+  const msScene = qs('#mastery-summary-scene');
+  msScene.addEventListener('touchstart', e => { _msTouchX = e.touches[0].clientX; }, { passive: true });
+  msScene.addEventListener('touchend', e => {
+    const delta = e.changedTouches[0].clientX - _msTouchX;
+    if (Math.abs(delta) > 50) _navigateMasterySummary(delta < 0 ? 1 : -1);
+  });
+  qs('#milestone-continue-btn').addEventListener('click', advanceEndFlow);
   qs('#glossary-link').addEventListener('click', renderGlossary);
   qs('#glossary-back-btn').addEventListener('click', renderHome);
   qs('#pose-card-back').addEventListener('click', hidePoseCard);

@@ -27,7 +27,10 @@ body {
   color: var(--charcoal);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  transition: background 0.25s ease;
 }
+
+body.dark-bg { background: var(--charcoal); }
 
 /* ── Screens ──────────────────────────────────────────────── */
 .screen { display: none; min-height: 100vh; }
@@ -921,16 +924,44 @@ body {
 #screen-insight.active #insight-continue-btn{ animation: resultSlideUp 0.4s ease forwards; animation-delay: 0.78s; }
 
 
+/* ── Quiz screen fade-out before result ──────────────────────── */
+@keyframes screenFadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+#screen-quiz.exiting {
+  animation: screenFadeOut 0.25s ease forwards;
+  pointer-events: none;
+}
+
+
 /* ═══════════════════════════════════════════════════════════
    RESULT SCREEN
 ═══════════════════════════════════════════════════════════ */
+#screen-result,
+#screen-mastery-summary,
+#screen-streak-milestone {
+  background: var(--charcoal);
+}
+
+/* ── End-session flow: fixed footer wrapper ──────────────────── */
+.end-flow-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+  background: var(--charcoal);
+  z-index: 10;
+}
+
 .result-panel {
   flex: 1;
-  background: var(--charcoal);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3rem 1.5rem;
+  padding: 3rem 1.5rem 5rem;
   animation: resultFade 0.35s ease forwards;
 }
 
@@ -1017,8 +1048,7 @@ body {
 .result-streak,
 .result-score,
 .result-message,
-.result-dots,
-.result-actions {
+.result-dots {
   opacity: 0;
 }
 
@@ -1027,17 +1057,154 @@ body {
 #screen-result.active .result-score   { animation: resultSlideUp 0.5s  ease forwards; animation-delay: 0.28s; }
 #screen-result.active .result-message { animation: resultSlideUp 0.45s ease forwards; animation-delay: 0.44s; }
 #screen-result.active .result-dots    { animation: resultSlideUp 0.45s ease forwards; animation-delay: 0.58s; }
-#screen-result.active .result-actions { animation: resultSlideUp 0.45s ease forwards; animation-delay: 0.72s; }
 
-.result-actions { display: flex; flex-direction: column; }
-.result-actions .btn-ghost {
-  border-color: rgba(138, 130, 120, 0.25);
+
+/* ═══════════════════════════════════════════════════════════
+   MASTERY SUMMARY SCREEN
+═══════════════════════════════════════════════════════════ */
+.mastery-summary-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.5rem 5rem;
+  animation: resultFade 0.35s ease forwards;
+}
+
+.mastery-summary-container {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mastery-summary-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.mastery-summary-count {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: 96px;
+  letter-spacing: 0.04em;
+  color: var(--cream);
+  line-height: 1;
+  margin-bottom: 1rem;
+}
+
+.mastery-summary-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
   color: var(--ash);
 }
-.result-actions .btn-ghost:hover {
-  border-color: var(--ash);
-  color: var(--cream);
+
+.mastery-summary-scene {
+  width: 100%;
 }
+
+#mastery-summary-card {
+  width: 100%;
+}
+
+.mastery-summary-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.mastery-summary-counter {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: var(--ash);
+}
+
+/* ── Mastery summary: staggered entrance ─────────────────────── */
+.mastery-summary-count,
+.mastery-summary-label,
+#mastery-summary-card,
+.mastery-summary-nav {
+  opacity: 0;
+}
+
+#screen-mastery-summary.active .mastery-summary-count { animation: resultSlideUp 0.5s  ease forwards; animation-delay: 0.05s; }
+#screen-mastery-summary.active .mastery-summary-label { animation: resultSlideUp 0.4s  ease forwards; animation-delay: 0.2s;  }
+#screen-mastery-summary.active #mastery-summary-card  { animation: resultSlideUp 0.45s ease forwards; animation-delay: 0.35s; }
+#screen-mastery-summary.active .mastery-summary-nav   { animation: resultSlideUp 0.4s  ease forwards; animation-delay: 0.5s;  }
+
+
+/* ═══════════════════════════════════════════════════════════
+   STREAK MILESTONE SCREEN
+═══════════════════════════════════════════════════════════ */
+.milestone-panel {
+  flex: 1;
+  background: var(--charcoal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem 5rem;
+  animation: resultFade 0.35s ease forwards;
+}
+
+.milestone-inner {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.milestone-icon {
+  color: var(--ember);
+  margin-bottom: 1.5rem;
+}
+.milestone-icon svg { width: 40px; height: 40px; display: block; margin: 0 auto; }
+
+.milestone-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: 96px;
+  letter-spacing: 0.04em;
+  color: var(--cream);
+  line-height: 1;
+  margin-bottom: 1rem;
+}
+
+.milestone-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin-bottom: 2rem;
+}
+
+.milestone-copy {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 19px;
+  letter-spacing: 0.03em;
+  color: var(--ash);
+  line-height: 1.4;
+  margin-bottom: 3rem;
+}
+
+.milestone-icon,
+.milestone-number,
+.milestone-label,
+.milestone-copy {
+  opacity: 0;
+}
+
+#screen-streak-milestone.active .milestone-icon   { animation: resultSlideUp 0.4s ease forwards; animation-delay: 0.05s; }
+#screen-streak-milestone.active .milestone-number { animation: resultSlideUp 0.5s ease forwards; animation-delay: 0.2s; }
+#screen-streak-milestone.active .milestone-label  { animation: resultSlideUp 0.4s ease forwards; animation-delay: 0.35s; }
+#screen-streak-milestone.active .milestone-copy   { animation: resultSlideUp 0.4s ease forwards; animation-delay: 0.5s; }
 
 
 /* ── Home footer links ────────────────────────────────────── */
@@ -1326,7 +1493,7 @@ body {
   min-height: 380px;
   background: var(--cream);
   border-radius: 12px;
-  padding: 2.25rem 2rem 2rem;
+  padding: 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1410,6 +1577,7 @@ body {
   border-radius: 50%;
   border: 1.5px solid var(--mid);
   background: transparent;
+  transition: background 0.5s ease, border-color 0.5s ease;
 }
 
 .mastery-pip--filled {

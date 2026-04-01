@@ -137,11 +137,57 @@
         <div class="result-score" id="result-score">0 / 10</div>
         <div class="result-message" id="result-message"></div>
         <div class="result-dots" id="result-dots"></div>
-<div class="result-actions">
-          <button id="again-btn" class="btn-primary btn-ember">Practice again</button>
-          <button id="home-btn" class="btn-ghost">Return home</button>
+      </div>
+    </div>
+    <div class="end-flow-footer">
+      <button id="end-continue-btn" class="btn-primary btn-ember">Continue</button>
+    </div>
+  </div>
+
+  <!-- ── MASTERY SUMMARY ──────────────────────────────────── -->
+  <div id="screen-mastery-summary" class="screen">
+    <div class="mastery-summary-panel">
+      <div class="mastery-summary-container">
+        <div class="mastery-summary-header">
+          <div class="mastery-summary-count" id="mastery-summary-count"></div>
+          <div class="mastery-summary-label">New poses mastered</div>
+        </div>
+        <div class="mastery-summary-scene" id="mastery-summary-scene">
+          <div id="mastery-summary-card" class="pose-card">
+            <div class="pose-card-category" id="msc-category"></div>
+            <div class="pose-card-body">
+              <div class="pose-card-sanskrit" id="msc-sanskrit"></div>
+              <div class="pose-card-pronunciation" id="msc-pronunciation"></div>
+              <div class="pose-card-rule"></div>
+              <div class="pose-card-english" id="msc-english"></div>
+            </div>
+            <div class="pose-card-mastery" id="msc-mastery"></div>
+          </div>
+        </div>
+        <div class="mastery-summary-nav" id="mastery-summary-nav">
+          <button id="mastery-summary-prev" class="pose-card-nav-btn" aria-label="Previous"></button>
+          <span class="mastery-summary-counter" id="mastery-summary-counter"></span>
+          <button id="mastery-summary-next" class="pose-card-nav-btn" aria-label="Next"></button>
         </div>
       </div>
+    </div>
+    <div class="end-flow-footer">
+      <button id="mastery-summary-continue" class="btn-primary btn-ember">Continue</button>
+    </div>
+  </div>
+
+  <!-- ── STREAK MILESTONE ──────────────────────────────────── -->
+  <div id="screen-streak-milestone" class="screen">
+    <div class="milestone-panel">
+      <div class="milestone-inner">
+        <div class="milestone-icon" id="milestone-icon"></div>
+        <div class="milestone-number" id="milestone-number"></div>
+        <div class="milestone-label" id="milestone-label">days in a row</div>
+        <div class="milestone-copy" id="milestone-copy"></div>
+      </div>
+    </div>
+    <div class="end-flow-footer">
+      <button id="milestone-continue-btn" class="btn-primary btn-ember">Continue</button>
     </div>
   </div>
 
