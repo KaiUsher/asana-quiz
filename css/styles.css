@@ -26,6 +26,7 @@ body {
   background: var(--light);
   color: var(--charcoal);
   min-height: 100vh;
+  min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
   transition: background 0.25s ease;
 }
@@ -33,7 +34,7 @@ body {
 body.dark-bg { background: var(--charcoal); }
 
 /* ── Screens ──────────────────────────────────────────────── */
-.screen { display: none; min-height: 100vh; }
+.screen { display: none; min-height: 100vh; min-height: 100dvh; }
 .screen.active { display: flex; flex-direction: column; }
 
 /* ── Layout ───────────────────────────────────────────────── */

@@ -822,7 +822,7 @@ function renderStatsScreen() {
   body.innerHTML = '';
 
   const stats = getStats();
-  const { total, masteredCount, practicingCount, dueCount } = stats;
+  const { total, masteredCount, practicingCount } = stats;
   const newCount      = total - masteredCount - practicingCount;
   const masteredPct   = masteredCount / total * 100;
   const practicingPct = (masteredCount + practicingCount) / total * 100;
@@ -848,25 +848,6 @@ function renderStatsScreen() {
   body.appendChild(overviewSection);
 
   // ── Due for review ──
-  const duePoses = POSES
-    .filter(p => isDue(p.id))
-    .sort((a, b) => getCardData(a.id).nextReview - getCardData(b.id).nextReview);
-
-  if (duePoses.length > 0) {
-    const dueSection = document.createElement('div');
-    dueSection.className = 'stats-section';
-    dueSection.innerHTML = '<div class="stats-section-label">Due for review</div>';
-    duePoses.forEach(pose => {
-      const row = document.createElement('div');
-      row.className = 'stats-row';
-      row.innerHTML = `
-        <span class="stats-row-label">${pose.english}</span>
-        <span class="stats-row-value stats-row-sanskrit">${pose.sanskrit}</span>
-      `;
-      dueSection.appendChild(row);
-    });
-    body.appendChild(dueSection);
-  }
 
   // ── Weakest poses ──
   // Require at least 3 attempts to filter out noise; sort by accuracy rate ascending
