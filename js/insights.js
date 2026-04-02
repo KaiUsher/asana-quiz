@@ -1,18 +1,18 @@
 const INSIGHT_RECENCY_KEY = 'asana_insight_recency_v1';
 const RECENCY_WINDOW = 3;
 
-function getRecentInsightIds() {
+export function getRecentInsightIds() {
   try { return JSON.parse(localStorage.getItem(INSIGHT_RECENCY_KEY)) || []; }
   catch { return []; }
 }
 
-function recordInsightShown(insightId) {
+export function recordInsightShown(insightId) {
   const recent = getRecentInsightIds();
   const updated = [insightId, ...recent.filter(id => id !== insightId)].slice(0, RECENCY_WINDOW);
   localStorage.setItem(INSIGHT_RECENCY_KEY, JSON.stringify(updated));
 }
 
-const INSIGHTS = [
+export const INSIGHTS = [
   {
     id: 'ardha',
     root: 'Ardha',

@@ -16,13 +16,13 @@ function _yesterday() {
   return d.toISOString().slice(0, 10);
 }
 
-function getStreak() {
+export function getStreak() {
   return _getStreakData().currentStreak || 0;
 }
 
 // Call once when a session is completed.
 // Safe to call multiple times in a day — won't double-count.
-function recordPractice() {
+export function recordPractice() {
   const data  = _getStreakData();
   const today = _today();
 
@@ -45,20 +45,20 @@ function recordPractice() {
 
 // Returns the highest unacknowledged milestone the current streak has reached,
 // or null if none. Milestones reset when the streak resets.
-function getStreakMilestoneToShow(currentStreak) {
+export function getStreakMilestoneToShow(currentStreak) {
   const data = _getStreakData();
   const last = data.lastMilestoneShown || 0;
   const hit  = STREAK_MILESTONES.filter(m => m <= currentStreak && m > last);
   return hit.length > 0 ? Math.max(...hit) : null;
 }
 
-function acknowledgeStreakMilestone(n) {
+export function acknowledgeStreakMilestone(n) {
   const data = _getStreakData();
   data.lastMilestoneShown = n;
   localStorage.setItem(STREAK_KEY, JSON.stringify(data));
 }
 
-function getStreakInfo() {
+export function getStreakInfo() {
   const data = _getStreakData();
   return {
     currentStreak:    data.currentStreak    || 0,

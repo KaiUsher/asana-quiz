@@ -1,4 +1,4 @@
-const POSES = [
+export const POSES = [
   // Standing
   { id: 'tadasana',            english: 'Mountain Pose',           sanskrit: 'Tadasana',                   category: 'Standing',
     pronunciation: 'tah · DAH · sah · nah',

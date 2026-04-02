@@ -1,4 +1,8 @@
-const CORRECT_COPY = [
+import { POSES }                           from './poses.js';
+import { INSIGHTS, getRecentInsightIds }   from './insights.js';
+import { isDue, isNew, getLevel, isMastered, updateCard } from './srs.js';
+
+export const CORRECT_COPY = [
   'Well recalled.',
   'Exactly right.',
   'You know this one.',
@@ -13,7 +17,7 @@ const WRONG_COPY = [
   'This one will come.',
 ];
 
-let session = {
+export let session = {
   questions: [],
   currentIndex: 0,
   score: 0,
@@ -68,7 +72,7 @@ function _buildQuestion(pose, pool) {
   return { type, pose, answered: null };
 }
 
-function buildSession(categoryFilter, sessionLength) {
+export function buildSession(categoryFilter, sessionLength) {
   sessionLength = sessionLength || 10;
   const pool = categoryFilter ? POSES.filter(p => p.category === categoryFilter) : POSES;
   const maxLen = Math.min(sessionLength, pool.length);
@@ -113,17 +117,17 @@ function buildSession(categoryFilter, sessionLength) {
   };
 }
 
-function getCurrentQuestion() {
+export function getCurrentQuestion() {
   return session.questions[session.currentIndex];
 }
 
-function getSessionProgress() {
+export function getSessionProgress() {
   return { current: session.currentIndex + 1, total: session.questions.length };
 }
 
 // grade: 'correct' | 'incorrect' | 'hard'
 // poseIds: array — single pose for MC/flashcard/type, all 4 for matching-pairs
-function recordAnswer(grade, poseIds) {
+export function recordAnswer(grade, poseIds) {
   const q = getCurrentQuestion();
   q.answered = grade;
   if (grade === 'correct') session.score++;
@@ -136,13 +140,13 @@ function recordAnswer(grade, poseIds) {
   }
 }
 
-function getNewlyMasteredPoses() {
+export function getNewlyMasteredPoses() {
   return session.newlyMastered
     .map(id => POSES.find(p => p.id === id))
     .filter(Boolean);
 }
 
-function maybeAppendRetries() {
+export function maybeAppendRetries() {
   if (session.retriesAppended) return false;
   session.retriesAppended = true;
 
@@ -169,19 +173,19 @@ function maybeAppendRetries() {
   return true;
 }
 
-function advanceSession() {
+export function advanceSession() {
   session.currentIndex++;
 }
 
-function isSessionComplete() {
+export function isSessionComplete() {
   return session.currentIndex >= session.questions.length;
 }
 
-function isSessionActive() {
+export function isSessionActive() {
   return session.questions.length > 0 && !isSessionComplete();
 }
 
-function getSessionResults() {
+export function getSessionResults() {
   return {
     score: session.score,
     total: session.questions.length,
@@ -189,21 +193,21 @@ function getSessionResults() {
   };
 }
 
-function shouldShowInsight() {
+export function shouldShowInsight() {
   return session.insight &&
     !session.insightShown &&
     session.currentIndex === Math.floor(session.questions.length / 2);
 }
 
-function markInsightShown() {
+export function markInsightShown() {
   session.insightShown = true;
 }
 
-function randomFrom(arr) {
+export function randomFrom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function shuffle(arr) {
+export function shuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

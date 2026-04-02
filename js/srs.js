@@ -1,6 +1,8 @@
 // SM-2 spaced repetition + question-level progression
 // Stored in localStorage under SRS_KEY
 
+import { POSES } from './poses.js';
+
 const SRS_KEY = 'asana_srs_v2';
 
 function _getSRSData() {
@@ -12,7 +14,7 @@ function _saveSRSData(data) {
   localStorage.setItem(SRS_KEY, JSON.stringify(data));
 }
 
-function getCardData(poseId) {
+export function getCardData(poseId) {
   const defaults = {
     interval: 0,
     easeFactor: 2.5,
@@ -31,7 +33,7 @@ function getCardData(poseId) {
 // correct  → advance level, SM-2 correct interval
 // incorrect → stay at level, SM-2 reset interval
 // hard (flashcard "Still learning") → stay at level, SM-2 reset interval
-function updateCard(poseId, grade) {
+export function updateCard(poseId, grade) {
   const data = _getSRSData();
   const card = getCardData(poseId);
 
@@ -66,24 +68,24 @@ function updateCard(poseId, grade) {
   _saveSRSData(data);
 }
 
-function getLevel(poseId) {
+export function getLevel(poseId) {
   return getCardData(poseId).level;
 }
 
-function isNew(poseId) {
+export function isNew(poseId) {
   return getCardData(poseId).totalSeen === 0;
 }
 
-function isDue(poseId) {
+export function isDue(poseId) {
   const card = getCardData(poseId);
   return card.totalSeen > 0 && card.nextReview <= Date.now();
 }
 
-function isMastered(poseId) {
+export function isMastered(poseId) {
   return getCardData(poseId).mastered === true;
 }
 
-function getStats(poses) {
+export function getStats(poses) {
   poses = poses || POSES;
   let dueCount = 0, masteredCount = 0, practicingCount = 0;
   poses.forEach(p => {
