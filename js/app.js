@@ -10,10 +10,12 @@ import {
   renderLengthPicker,
 }                                                      from './render-home.js';
 import { renderGlossary, renderStatsScreen }           from './render-glossary-stats.js';
+import { renderRoots }                                 from './render-roots.js';
 import { startQuiz, renderQuestion, handleContinue }   from './render-quiz.js';
 import {
   advanceEndFlow,
   setHomeRenderer,
+  getInsightContinueFn,
   navigateMasterySummary,
   onMasterySummaryTouchStart,
   onMasterySummaryTouchEnd,
@@ -74,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
   qs('#settings-caret').innerHTML      = ICON_CARET_DOWN;
   qs('#glossary-back-btn').innerHTML   = ICON_ARROW_LEFT;
   qs('#stats-back-btn').innerHTML      = ICON_ARROW_LEFT;
+  qs('#roots-back-btn').innerHTML      = ICON_ARROW_LEFT;
   qs('#mastery-caret').innerHTML       = ICON_CARET_RIGHT;
   qs('#mastery-summary-prev').innerHTML = ICON_CARET_LEFT;
   qs('#mastery-summary-next').innerHTML = ICON_CARET_RIGHT;
@@ -93,12 +96,17 @@ document.addEventListener('DOMContentLoaded', () => {
   qs('#continue-btn').addEventListener('click', handleContinue);
 
   qs('#insight-continue-btn').addEventListener('click', () => {
+    const continueFn = getInsightContinueFn();
     const screen = qs('#screen-insight');
     screen.classList.add('exiting');
     setTimeout(() => {
       screen.classList.remove('exiting');
-      renderQuestion();
-      showScreen('screen-quiz');
+      if (continueFn) {
+        continueFn();
+      } else {
+        renderQuestion();
+        showScreen('screen-quiz');
+      }
     }, 320);
   });
 
@@ -114,11 +122,13 @@ document.addEventListener('DOMContentLoaded', () => {
   msScene.addEventListener('touchstart', e => onMasterySummaryTouchStart(e.touches[0].clientX),        { passive: true });
   msScene.addEventListener('touchend',   e => onMasterySummaryTouchEnd(e.changedTouches[0].clientX));
 
-  // ── Glossary / Stats ──────────────────────────────────────────────
+  // ── Glossary / Stats / Roots ──────────────────────────────────────
   qs('#glossary-link').addEventListener('click',        renderGlossary);
   qs('#glossary-back-btn').addEventListener('click',    doRenderHome);
   qs('#stats-back-btn').addEventListener('click',       doRenderHome);
   qs('.mastery-block').addEventListener('click',        renderStatsScreen);
+  qs('#roots-link').addEventListener('click',           renderRoots);
+  qs('#roots-back-btn').addEventListener('click',       doRenderHome);
 
   // ── Pose card overlay ─────────────────────────────────────────────
   qs('#pose-card-back').addEventListener('click', hidePoseCard);

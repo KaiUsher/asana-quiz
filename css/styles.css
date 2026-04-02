@@ -1673,6 +1673,85 @@ body.dark-bg { background: var(--charcoal); }
 ═══════════════════════════════════════════════════════════ */
 #screen-stats { background: var(--light); }
 
+/* ── Roots screen ──────────────────────────────────────────── */
+#screen-roots { background: var(--light); }
+
+.roots-body {
+  flex: 1;
+  overflow-y: auto;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 3rem;
+}
+
+.roots-count {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ash);
+  text-align: center;
+  margin-bottom: 0.3rem;
+}
+
+#roots-hint {
+  padding: 0;
+  margin-bottom: 1.5rem;
+}
+
+.roots-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.roots-tile {
+  border-radius: 8px;
+  padding: 0.75rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-height: 72px;
+  text-align: center;
+}
+
+.roots-tile--unlocked {
+  background: var(--cream);
+  border: 0.5px solid var(--mid);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.roots-tile--unlocked:hover {
+  border-color: var(--ember);
+}
+
+.roots-tile--locked {
+  background: var(--mid);
+  opacity: 0.35;
+}
+
+.roots-tile-root {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 18px;
+  color: var(--charcoal);
+  letter-spacing: 0.02em;
+}
+
+.roots-tile-meaning {
+  font-size: 10px;
+  color: var(--ash);
+  letter-spacing: 0.05em;
+}
+
+.roots-tile-lock {
+  font-size: 18px;
+  color: var(--ash);
+}
+
 .stats-body {
   flex: 1;
   overflow-y: auto;

@@ -1,13 +1,16 @@
 import { POSES }                                                        from './poses.js';
-import { recordInsightShown }                                            from './insights.js';
+import { recordInsightShown, recordRootSeen }                            from './insights.js';
 import { getSessionResults, getNewlyMasteredPoses, session }             from './quiz.js';
 import { recordPractice, getStreakMilestoneToShow, acknowledgeStreakMilestone } from './streak.js';
 import { ICON_FLAME, ICON_CHECK, ICON_X, STREAK_MILESTONE_COPY }        from './icons.js';
 import { qs, showScreen }                                                from './utils.js';
 
 // ── End-session flow queue ────────────────────────────────────────────
-let endFlow      = [];
+let endFlow       = [];
 let _renderHomeFn = null;
+let _insightContinueFn = null;
+
+export function getInsightContinueFn() { return _insightContinueFn; }
 
 export function setHomeRenderer(fn) {
   _renderHomeFn = fn;
@@ -58,9 +61,33 @@ export function renderResult() {
 }
 
 // ── Insight ────────────────────────────────────────────────────────────
+export function showInsightCard(insight, onContinue) {
+  _insightContinueFn = onContinue;
+  qs('.insight-prelude').style.display = 'none';
+  qs('#insight-root').textContent    = insight.root;
+  qs('#insight-meaning').textContent = insight.meaning;
+  qs('#insight-body').textContent    = insight.explanation;
+
+  const posesEl = qs('#insight-poses');
+  posesEl.innerHTML = '';
+  insight.poseIds.forEach(id => {
+    const pose = POSES.find(p => p.id === id);
+    if (!pose) return;
+    const chip       = document.createElement('span');
+    chip.className   = 'insight-pose-chip';
+    chip.textContent = pose.sanskrit;
+    posesEl.appendChild(chip);
+  });
+
+  showScreen('screen-insight');
+}
+
 export function renderInsight() {
   const insight = session.insight;
+  _insightContinueFn = null;
+  qs('.insight-prelude').style.display = '';
   recordInsightShown(insight.id);
+  recordRootSeen(insight.id);
   qs('#insight-root').textContent    = insight.root;
   qs('#insight-meaning').textContent = insight.meaning;
   qs('#insight-body').textContent    = insight.explanation;

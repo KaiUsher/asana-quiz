@@ -11,7 +11,7 @@ export function renderGlossary() {
 
   const hint = document.createElement('p');
   hint.className   = 'glossary-hint';
-  hint.textContent = 'Tap any pose to explore.';
+  hint.textContent = 'Tap a pose to explore.';
   body.appendChild(hint);
 
   const categories = [...new Set(POSES.map(p => p.category))];

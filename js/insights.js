@@ -12,6 +12,19 @@ export function recordInsightShown(insightId) {
   localStorage.setItem(INSIGHT_RECENCY_KEY, JSON.stringify(updated));
 }
 
+const ROOTS_SEEN_KEY = 'asana_roots_seen_v1';
+
+export function getRootsSeenIds() {
+  try { return new Set(JSON.parse(localStorage.getItem(ROOTS_SEEN_KEY)) || []); }
+  catch { return new Set(); }
+}
+
+export function recordRootSeen(insightId) {
+  const seen = getRootsSeenIds();
+  seen.add(insightId);
+  localStorage.setItem(ROOTS_SEEN_KEY, JSON.stringify([...seen]));
+}
+
 export const INSIGHTS = [
   {
     id: 'ardha',
