@@ -1,0 +1,14 @@
+{
+  "name": "Asana — Sanskrit Practice",
+  "short_name": "Asana",
+  "description": "Sanskrit memory practice for yoga pose names",
+  "start_url": "/asana-quiz/",
+  "scope": "/asana-quiz/",
+  "display": "standalone",
+  "background_color": "#faf7f2",
+  "theme_color": "#faf7f2",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

@@ -7,6 +7,22 @@ let currentSlide = 0;
 // ── End-session flow ──────────────────────────────────────────
 let endFlow = [];
 
+// ── PWA update flow ───────────────────────────────────────────
+// _pendingWorker: a new SW that has installed but is waiting for
+//   a safe moment to take over (i.e. not mid-session).
+// _swReloadReady: guards controllerchange so a first-install
+//   activation never triggers an accidental reload.
+let _pendingWorker  = null;
+let _swReloadReady  = false;
+
+function _applyUpdate() {
+  document.getElementById('update-overlay').style.opacity = '1';
+  setTimeout(() => {
+    _swReloadReady = true;
+    _pendingWorker.postMessage('SKIP_WAITING');
+  }, 300);
+}
+
 function advanceEndFlow() {
   if (endFlow.length > 0) {
     endFlow.shift()();
@@ -113,6 +129,7 @@ function showScreen(id) {
 
 // ── Home ─────────────────────────────────────────────────────
 function renderHome() {
+  if (_pendingWorker) { _applyUpdate(); return; }
   document.body.classList.remove('dark-bg');
   renderStats();
   renderStreak();
@@ -1148,4 +1165,29 @@ document.addEventListener('DOMContentLoaded', () => {
   // Show on first visit
   if (!localStorage.getItem(ONBOARDING_KEY)) showOnboarding();
 
+
 });
+
+// ── Service worker registration ───────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    reg.addEventListener('updatefound', () => {
+      const nw = reg.installing;
+      nw.addEventListener('statechange', () => {
+        // 'installed' + an existing controller = a genuine update
+        // (first install has no controller yet, so we skip it)
+        if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+          _pendingWorker = nw;
+          if (!isSessionActive()) _applyUpdate();
+          // If a session is active, _pendingWorker is consumed the
+          // next time renderHome() is called (end of session flow).
+        }
+      });
+    });
+  }).catch(() => {}); // SW unavailable — app still works normally
+
+  // Only reload when we deliberately triggered SKIP_WAITING.
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (_swReloadReady) window.location.reload();
+  });
+}

@@ -177,6 +177,10 @@ function isSessionComplete() {
   return session.currentIndex >= session.questions.length;
 }
 
+function isSessionActive() {
+  return session.questions.length > 0 && !isSessionComplete();
+}
+
 function getSessionResults() {
   return {
     score: session.score,
