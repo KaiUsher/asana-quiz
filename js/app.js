@@ -138,6 +138,12 @@ document.addEventListener('DOMContentLoaded', () => {
     new Audio('audio/' + poseId + '.mp3').play();
   });
 
+  qs('#msc-pronunciation').addEventListener('click', e => {
+    const poseId = e.currentTarget.dataset.poseId;
+    if (!poseId) return;
+    new Audio('audio/' + poseId + '.mp3').play();
+  });
+
   qs('#pose-card-back').addEventListener('click', hidePoseCard);
   qs('#pose-card-prev').addEventListener('click', () => navigatePoseCard(-1));
   qs('#pose-card-next').addEventListener('click', () => navigatePoseCard(1));
@@ -148,6 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
   cardScene.addEventListener('touchend',   e => {
     const action = onPoseCardTouchEnd(e.changedTouches[0].clientX);
     if (action === 'tapped') {
+      if (e.target.closest('#pose-card-pronunciation')) return;
       const card = qs('#pose-card');
       if (card.classList.contains('has-description')) {
         card.classList.toggle('flipped');

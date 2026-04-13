@@ -8,13 +8,33 @@ export const CORRECT_COPY = [
   'You know this one.',
   'Beautifully remembered.',
   'Precise.',
+  'That name is with you.',
+  'Steady recall.',
+  'No hesitation.',
+  'Clear.',
+  'Known.',
+  'The practice is showing.',
+  'Right, without doubt.',
+  'Held in memory.',
+  'This one is yours.',
+  'It\'s coming together.',
 ];
 
-const WRONG_COPY = [
-  'Not quite.',
+export const WRONG_PREFIX = [
+  'Not this time.',
   'Almost.',
-  'Keep going.',
+  'Patience.',
   'This one will come.',
+  'Let it settle.',
+  'It\'s coming.',
+  'Keep returning to it.',
+  'Not quite.',
+];
+
+export const CORRECT_COPY_MATCH = [
+  'All matched.',
+  'Every pair found.',
+  'Every name in its place.',
 ];
 
 export let session = {

@@ -10,6 +10,8 @@ import {
   markInsightShown,
   buildSession,
   CORRECT_COPY,
+  WRONG_PREFIX,
+  CORRECT_COPY_MATCH,
   randomFrom,
   shuffle,
 }                                    from './quiz.js';
@@ -97,7 +99,7 @@ function handleMCAnswer(selectedId) {
   showFeedback(correct ? 'correct' : 'wrong',
     correct
       ? randomFrom(CORRECT_COPY)
-      : 'The answer was <em>' + (q.direction === 'en-to-sa' ? q.pose.sanskrit : q.pose.english) + '</em>'
+      : randomFrom(WRONG_PREFIX) + ' The answer was <em>' + (q.direction === 'en-to-sa' ? q.pose.sanskrit : q.pose.english) + '</em>'
   );
 }
 
@@ -206,7 +208,7 @@ function setupTypeEnglish(q) {
     showFeedback(correct ? 'correct' : 'wrong',
       correct
         ? randomFrom(CORRECT_COPY)
-        : 'The answer was <em>' + q.pose.english + '</em>'
+        : randomFrom(WRONG_PREFIX) + ' The answer was <em>' + q.pose.english + '</em>'
     );
   };
 
@@ -302,7 +304,7 @@ function setupTileBuild(q) {
     showFeedback(correct ? 'correct' : 'wrong',
       correct
         ? randomFrom(CORRECT_COPY)
-        : 'The answer was <em>' + q.correctTiles.join(' ') + '</em>'
+        : randomFrom(WRONG_PREFIX) + ' The answer was <em>' + q.correctTiles.join(' ') + '</em>'
     );
   });
 
@@ -350,7 +352,7 @@ function setupMatchingPairs(q) {
       sansBtn.disabled = true;
       if (matchedIds.size === q.poses.length) {
         recordAnswer('correct', q.poses.map(p => p.id));
-        showFeedback('correct', 'All matched.');
+        showFeedback('correct', randomFrom(CORRECT_COPY_MATCH));
       }
     } else {
       engBtn.classList.add('wrong-flash');
@@ -425,7 +427,7 @@ export function handleContinue() {
   if (isSessionComplete()) {
     if (maybeAppendRetries()) {
       renderQuestion();
-      setTimeout(() => { document.activeElement?.blur(); }, 0);
+      requestAnimationFrame(() => { requestAnimationFrame(() => { document.activeElement?.blur(); }); });
       return;
     }
     document.body.classList.add('dark-bg');
@@ -441,6 +443,6 @@ export function handleContinue() {
     renderInsight();
   } else {
     renderQuestion();
-    setTimeout(() => { document.activeElement?.blur(); }, 0);
+    requestAnimationFrame(() => { requestAnimationFrame(() => { document.activeElement?.blur(); }); });
   }
 }

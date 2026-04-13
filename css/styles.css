@@ -940,11 +940,18 @@ body.dark-bg { background: var(--charcoal); }
   font-size: 10px;
   font-weight: 400;
   letter-spacing: 0.1em;
+  font-family: inherit;
   color: var(--warm);
   background: var(--cream);
   border: 0.5px solid var(--mid);
   border-radius: 2px;
   padding: 5px 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.insight-pose-chip:hover {
+  background: var(--mid);
+  border-color: var(--ash);
 }
 
 /* Staggered entrance */

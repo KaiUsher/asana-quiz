@@ -1,9 +1,43 @@
 import { POSES }                                                        from './poses.js';
 import { recordInsightShown, recordRootSeen }                            from './insights.js';
-import { getSessionResults, getNewlyMasteredPoses, session }             from './quiz.js';
+import { getSessionResults, getNewlyMasteredPoses, session, randomFrom } from './quiz.js';
 import { recordPractice, getStreakMilestoneToShow, acknowledgeStreakMilestone } from './streak.js';
-import { ICON_FLAME, ICON_CHECK, ICON_X, STREAK_MILESTONE_COPY }        from './icons.js';
+import { ICON_FLAME, ICON_CHECK, ICON_X, ICON_SPEAKER, STREAK_MILESTONE_COPY } from './icons.js';
 import { qs, showScreen }                                                from './utils.js';
+import { showPoseCard }                                                  from './overlay.js';
+
+const RESULT_COPY_PERFECT = [
+  'Perfect. A still mind recalls all.',
+  'Complete recall.',
+  'Everything found.',
+];
+
+const RESULT_COPY_STRONG = [
+  'Well done. The heat is building.',
+  'The practice is working.',
+  'Most of them yours.',
+  'Solid. Keep returning.',
+];
+
+const RESULT_COPY_GOOD = [
+  'Good practice. Keep returning.',
+  'The names are settling.',
+  'Progress in every session.',
+  'Consistency will carry you.',
+];
+
+const RESULT_COPY_KEEP_GOING = [
+  'Every practice is progress.',
+  'Difficulty is where learning lives.',
+  'The harder ones will come.',
+  'Return tomorrow.',
+];
+
+const INSIGHT_PRELUDE = [
+  'A moment to breathe',
+  'Pause here a moment',
+  'A breath between poses',
+];
 
 // ── End-session flow queue ────────────────────────────────────────────
 let endFlow       = [];
@@ -31,11 +65,11 @@ export function renderResult() {
 
   qs('#result-score').textContent = results.score + ' / ' + results.total;
 
-  let msg = 'Every practice is progress.';
-  if (pct === 1)       msg = 'Perfect. A still mind recalls all.';
-  else if (pct >= 0.8) msg = 'Well done. The heat is building.';
-  else if (pct >= 0.6) msg = 'Good practice. Keep returning.';
-  qs('#result-message').textContent = msg;
+  let pool = RESULT_COPY_KEEP_GOING;
+  if (pct === 1)       pool = RESULT_COPY_PERFECT;
+  else if (pct >= 0.8) pool = RESULT_COPY_STRONG;
+  else if (pct >= 0.6) pool = RESULT_COPY_GOOD;
+  qs('#result-message').textContent = randomFrom(pool);
 
   const streak = recordPractice();
   qs('#result-streak').innerHTML =
@@ -73,9 +107,10 @@ export function showInsightCard(insight, onContinue) {
   insight.poseIds.forEach(id => {
     const pose = POSES.find(p => p.id === id);
     if (!pose) return;
-    const chip       = document.createElement('span');
+    const chip       = document.createElement('button');
     chip.className   = 'insight-pose-chip';
     chip.textContent = pose.sanskrit;
+    chip.addEventListener('click', () => showPoseCard(pose));
     posesEl.appendChild(chip);
   });
 
@@ -85,7 +120,9 @@ export function showInsightCard(insight, onContinue) {
 export function renderInsight() {
   const insight = session.insight;
   _insightContinueFn = null;
-  qs('.insight-prelude').style.display = '';
+  const preludeEl = qs('.insight-prelude');
+  preludeEl.style.display  = '';
+  preludeEl.textContent    = randomFrom(INSIGHT_PRELUDE);
   recordInsightShown(insight.id);
   recordRootSeen(insight.id);
   qs('#insight-root').textContent    = insight.root;
@@ -105,9 +142,10 @@ export function renderInsight() {
     .forEach(id => {
       const pose = POSES.find(p => p.id === id);
       if (!pose) return;
-      const chip       = document.createElement('span');
+      const chip       = document.createElement('button');
       chip.className   = 'insight-pose-chip';
       chip.textContent = pose.sanskrit;
+      chip.addEventListener('click', () => showPoseCard(pose));
       posesEl.appendChild(chip);
     });
 
@@ -126,8 +164,9 @@ export function renderMasterySummary(poses) {
   _msViewed = new Set();
 
   const count = poses.length;
-  qs('#mastery-summary-count').textContent  = String(count);
-  qs('#mastery-summary-nav').style.display  = count > 1 ? '' : 'none';
+  qs('#mastery-summary-count').textContent        = String(count);
+  qs('.mastery-summary-label').textContent        = count === 1 ? 'New pose mastered' : 'New poses mastered';
+  qs('#mastery-summary-nav').style.display        = count > 1 ? '' : 'none';
 
   _renderMasterySummaryCard(true);
   showScreen('screen-mastery-summary');
@@ -138,10 +177,13 @@ function _renderMasterySummaryCard(animate) {
   const alreadySeen   = _msViewed.has(_msIndex);
   const shouldAnimate = animate && !alreadySeen;
 
-  qs('#msc-category').textContent      = pose.category;
-  qs('#msc-sanskrit').textContent      = pose.sanskrit;
-  qs('#msc-english').textContent       = pose.english;
-  qs('#msc-pronunciation').textContent = pose.pronunciation || '';
+  qs('#msc-category').textContent = pose.category;
+  qs('#msc-sanskrit').textContent = pose.sanskrit;
+  qs('#msc-english').textContent  = pose.english;
+
+  const pronEl          = qs('#msc-pronunciation');
+  pronEl.dataset.poseId = pose.id;
+  pronEl.innerHTML      = `<span class="pron-speaker">${ICON_SPEAKER}</span><span>${pose.pronunciation || ''}</span>`;
 
   qs('#mastery-summary-counter').textContent =
     _msPoses.length > 1 ? (_msIndex + 1) + ' / ' + _msPoses.length : '';

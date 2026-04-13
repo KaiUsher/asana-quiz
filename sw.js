@@ -7,7 +7,7 @@
 // Convention: 'asana-quiz-YYYYMMDD', increment suffix if
 // deploying multiple times in one day.
 // ─────────────────────────────────────────────────────────────
-const CACHE_NAME = 'asana-quiz-20260402';
+const CACHE_NAME = 'asana-quiz-20260413';
 
 const FILES_TO_CACHE = [
   '/asana-quiz/',

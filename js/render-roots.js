@@ -10,7 +10,7 @@ export function renderRoots() {
   qs('#roots-count').textContent = `${count} / ${total} Discovered`;
 
   const hint = qs('#roots-hint');
-  hint.textContent = count < total ? 'Keep studying to unlock.' : 'Collection complete.';
+  hint.textContent = count < total ? 'Unlocked through practice.' : 'Collection complete.';
   hint.style.display = '';
 
   const grid = qs('#roots-grid');
