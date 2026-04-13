@@ -152,11 +152,13 @@ function setupFlashcard(q) {
   });
 
   gotItBtn.addEventListener('click', () => {
+    gotItBtn.blur();
     recordAnswer('correct', [q.pose.id]);
     setTimeout(handleContinue, 200);
   });
 
   stillBtn.addEventListener('click', () => {
+    stillBtn.blur();
     recordAnswer('hard', [q.pose.id]);
     setTimeout(handleContinue, 200);
   });

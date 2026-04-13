@@ -17,7 +17,10 @@ function _yesterday() {
 }
 
 export function getStreak() {
-  return _getStreakData().currentStreak || 0;
+  const data = _getStreakData();
+  if (!data.lastPracticeDate) return 0;
+  if (data.lastPracticeDate !== _today() && data.lastPracticeDate !== _yesterday()) return 0;
+  return data.currentStreak || 0;
 }
 
 // Call once when a session is completed.
@@ -60,8 +63,9 @@ export function acknowledgeStreakMilestone(n) {
 
 export function getStreakInfo() {
   const data = _getStreakData();
+  const streakAlive = data.lastPracticeDate === _today() || data.lastPracticeDate === _yesterday();
   return {
-    currentStreak:    data.currentStreak    || 0,
+    currentStreak:    streakAlive ? (data.currentStreak || 0) : 0,
     longestStreak:    data.longestStreak    || 0,
     lastPracticeDate: data.lastPracticeDate || null,
   };

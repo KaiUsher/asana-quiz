@@ -112,7 +112,10 @@ export function renderStatsScreen() {
     const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
     if      (streakInfo.lastPracticeDate === today)     lastPracticeText = 'Today';
     else if (streakInfo.lastPracticeDate === yesterday) lastPracticeText = 'Yesterday';
-    else                                                lastPracticeText = streakInfo.lastPracticeDate;
+    else {
+      const [y, m, d] = streakInfo.lastPracticeDate.split('-');
+      lastPracticeText = `${d}/${m}/${y}`;
+    }
   }
 
   const streakSection       = document.createElement('div');
