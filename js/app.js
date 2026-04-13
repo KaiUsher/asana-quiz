@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
   msScene.addEventListener('touchstart', e => onMasterySummaryTouchStart(e.touches[0].clientX),        { passive: true });
   msScene.addEventListener('touchend',   e => onMasterySummaryTouchEnd(e.changedTouches[0].clientX));
 
-  // ── Glossary / Stats / Roots ──────────────────────────────────────
+// ── Glossary / Stats / Roots ──────────────────────────────────────
   qs('#glossary-link').addEventListener('click',        renderGlossary);
   qs('#glossary-back-btn').addEventListener('click',    doRenderHome);
   qs('#stats-back-btn').addEventListener('click',       doRenderHome);
@@ -131,6 +131,13 @@ document.addEventListener('DOMContentLoaded', () => {
   qs('#roots-back-btn').addEventListener('click',       doRenderHome);
 
   // ── Pose card overlay ─────────────────────────────────────────────
+  qs('#pose-card-pronunciation').addEventListener('click', e => {
+    e.stopPropagation();
+    const poseId = e.currentTarget.dataset.poseId;
+    if (!poseId) return;
+    new Audio('audio/' + poseId + '.mp3').play();
+  });
+
   qs('#pose-card-back').addEventListener('click', hidePoseCard);
   qs('#pose-card-prev').addEventListener('click', () => navigatePoseCard(-1));
   qs('#pose-card-next').addEventListener('click', () => navigatePoseCard(1));

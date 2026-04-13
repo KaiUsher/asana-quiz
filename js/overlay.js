@@ -1,6 +1,7 @@
 import { POSES }          from './poses.js';
 import { isNew, getLevel } from './srs.js';
 import { qs }              from './utils.js';
+import { ICON_SPEAKER }    from './icons.js';
 
 let _cardList    = POSES;
 let _cardIndex   = 0;
@@ -29,7 +30,9 @@ function _renderPoseCard() {
   qs('#pose-card-category').textContent      = pose.category;
   qs('#pose-card-sanskrit').textContent      = pose.sanskrit;
   qs('#pose-card-english').textContent       = pose.english;
-  qs('#pose-card-pronunciation').textContent = pose.pronunciation || '';
+  const pronEl = qs('#pose-card-pronunciation');
+  pronEl.dataset.poseId = pose.id;
+  pronEl.innerHTML = `<span class="pron-speaker">${ICON_SPEAKER}</span><span>${pose.pronunciation || ''}</span>`;
 
   const masteryEl = qs('#pose-card-mastery');
   masteryEl.className = 'pose-card-mastery';

@@ -57,9 +57,25 @@ self.addEventListener('activate', event => {
 
 // Fetch: serve from cache, fall back to network.
 // Only intercept same-origin GET requests.
+//
+// Audio files use a network-first strategy so they're cached on first play
+// without needing to pre-cache 58 paths during install.
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   if (!event.request.url.startsWith(self.location.origin)) return;
+
+  if (event.request.url.includes('/audio/')) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request))
