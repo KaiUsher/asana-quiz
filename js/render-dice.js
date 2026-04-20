@@ -59,7 +59,6 @@ export function rollDice(count) {
     list.appendChild(row);
   });
 
-  qs('#dice-results-label').textContent = `${n} pose${n === 1 ? '' : 's'}`;
   qs('#dice-results').hidden = false;
 
   // Transition button to secondary state after first draw

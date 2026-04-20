@@ -2,7 +2,7 @@ import { isSessionActive }                             from './quiz.js';
 import {
   ICON_ARROW_LEFT, ICON_CARET_DOWN,
   ICON_CARET_LEFT, ICON_CARET_RIGHT,
-  ICON_DICE,
+  ICON_DICE, ICON_PLUS, ICON_MINUS,
 }                                                      from './icons.js';
 import { qs, showScreen }                              from './utils.js';
 import { initRouter, navigate }                        from './router.js';
@@ -93,6 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
   qs('#roots-back-btn').innerHTML      = ICON_ARROW_LEFT;
   qs('#dice-link').innerHTML           = ICON_DICE;
   qs('#dice-back-btn').innerHTML       = ICON_ARROW_LEFT;
+  qs('#dice-dec').innerHTML            = ICON_MINUS;
+  qs('#dice-inc').innerHTML            = ICON_PLUS;
   qs('#dice-settings-caret').innerHTML = ICON_CARET_DOWN;
   qs('#mastery-caret').innerHTML       = ICON_CARET_RIGHT;
   qs('#mastery-summary-prev').innerHTML = ICON_CARET_LEFT;

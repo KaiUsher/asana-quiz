@@ -1963,14 +1963,13 @@ body.dark-bg { background: var(--charcoal); }
   border: 1.5px solid var(--ember);
   background: none;
   color: var(--ember);
-  font-size: 20px;
-  line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 }
+.dice-step-btn svg { width: 18px; height: 18px; display: block; }
 .dice-step-btn:hover {
   background: var(--ember);
   color: var(--cream);
@@ -1996,13 +1995,3 @@ body.dark-bg { background: var(--charcoal); }
 
 .dice-results { margin-top: 2rem; width: 100%; }
 
-.dice-results-label {
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--ash);
-  padding-bottom: 0.6rem;
-  border-bottom: 0.5px solid var(--mid);
-  margin-bottom: 0;
-}

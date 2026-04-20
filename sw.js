@@ -7,7 +7,7 @@
 // Convention: 'asana-quiz-YYYYMMDD', increment suffix if
 // deploying multiple times in one day.
 // ─────────────────────────────────────────────────────────────
-const CACHE_NAME = 'asana-quiz-20260413';
+const CACHE_NAME = 'asana-quiz-20260420';
 
 const FILES_TO_CACHE = [
   '/asana-quiz/',
@@ -31,6 +31,8 @@ const FILES_TO_CACHE = [
   '/asana-quiz/js/render-quiz.js',
   '/asana-quiz/js/render-results.js',
   '/asana-quiz/js/render-roots.js',
+  '/asana-quiz/js/render-dice.js',
+  '/asana-quiz/js/router.js',
 ];
 
 // Install: fetch all app files fresh into the new cache.
