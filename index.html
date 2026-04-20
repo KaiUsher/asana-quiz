@@ -94,8 +94,43 @@
     <div class="glossary-header">
       <button id="glossary-back-btn" class="quit-btn" aria-label="Back"></button>
       <div class="glossary-header-title">Asana Glossary</div>
+      <button id="dice-link" class="quit-btn glossary-header-dice" aria-label="Yoga Dice"></button>
     </div>
     <div class="glossary-body" id="glossary-body"></div>
+  </div>
+
+  <!-- ── DICE ───────────────────────────────────────────────── -->
+  <div id="screen-dice" class="screen">
+    <div class="glossary-header">
+      <button id="dice-back-btn" class="quit-btn" aria-label="Back"></button>
+      <div class="glossary-header-title">Yoga Dice</div>
+    </div>
+    <div class="dice-body">
+      <div class="dice-controls">
+        <p class="dice-label">How many poses?</p>
+        <div class="dice-stepper">
+          <button id="dice-dec" class="dice-step-btn" aria-label="Decrease">–</button>
+          <input id="dice-count" class="dice-count-input" type="number" value="5" min="1" max="30">
+          <button id="dice-inc" class="dice-step-btn" aria-label="Increase">+</button>
+        </div>
+        <button id="dice-roll-btn" class="btn-primary btn-ember dice-roll-btn">Draw Poses</button>
+      </div>
+
+      <button id="dice-settings-toggle" class="settings-toggle">
+        <span>Filter poses</span>
+        <span id="dice-settings-caret" class="settings-caret"></span>
+      </button>
+      <div id="dice-settings-panel" class="settings-panel">
+        <div class="settings-inner">
+          <div class="section-label">Practice focus</div>
+          <div id="dice-category-pills" class="category-pills"></div>
+        </div>
+      </div>
+      <div id="dice-results" class="dice-results" hidden>
+        <div class="dice-results-label" id="dice-results-label"></div>
+        <div id="dice-results-list"></div>
+      </div>
+    </div>
   </div>
 
   <!-- ── STATS ──────────────────────────────────────────────── -->

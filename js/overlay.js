@@ -7,9 +7,9 @@ let _cardList    = POSES;
 let _cardIndex   = 0;
 let _touchStartX = 0;
 
-export function showPoseCard(pose) {
-  _cardList  = POSES;
-  _cardIndex = POSES.findIndex(p => p.id === pose.id);
+export function showPoseCard(pose, list = POSES) {
+  _cardList  = list;
+  _cardIndex = list.findIndex(p => p.id === pose.id);
   _renderPoseCard();
   qs('#pose-card-overlay').classList.add('visible');
   document.body.style.overflow = 'hidden';

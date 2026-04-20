@@ -62,7 +62,7 @@ body.dark-bg { background: var(--charcoal); }
   padding: 1rem;
   background: var(--charcoal);
   color: var(--cream);
-  border: none;
+  border: 0.5px solid transparent;
   border-radius: 4px;
   font-size: 11px;
   font-weight: 400;
@@ -582,7 +582,7 @@ body.dark-bg { background: var(--charcoal); }
   padding: 1rem;
   background: var(--charcoal);
   color: var(--cream);
-  border: none;
+  border: 0.5px solid transparent;
   border-radius: 4px;
   font-size: 11px;
   font-weight: 400;
@@ -1912,4 +1912,97 @@ body.dark-bg { background: var(--charcoal); }
   pointer-events: none;
   transition: opacity 0.3s ease;
   z-index: 9999;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DICE SCREEN
+═══════════════════════════════════════════════════════════ */
+#screen-dice { background: var(--light); }
+
+.glossary-header-dice { margin-left: auto; }
+
+.dice-body {
+  flex: 1;
+  overflow-y: auto;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.dice-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 2.5rem;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.dice-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin: 0;
+}
+
+.dice-stepper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dice-step-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ember);
+  background: none;
+  color: var(--ember);
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.dice-step-btn:hover {
+  background: var(--ember);
+  color: var(--cream);
+}
+
+.dice-count-input {
+  width: 56px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 300;
+  color: var(--charcoal);
+  background: none;
+  border: none;
+  border-bottom: 1.5px solid var(--mid);
+  padding: 0.1rem 0;
+  -moz-appearance: textfield;
+}
+.dice-count-input::-webkit-outer-spin-button,
+.dice-count-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.dice-count-input:focus { outline: none; border-bottom-color: var(--ember); }
+
+.dice-roll-btn { margin-top: 0.5rem; }
+
+.dice-results { margin-top: 2rem; width: 100%; }
+
+.dice-results-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ash);
+  padding-bottom: 0.6rem;
+  border-bottom: 0.5px solid var(--mid);
+  margin-bottom: 0;
 }

@@ -2,14 +2,17 @@ import { isSessionActive }                             from './quiz.js';
 import {
   ICON_ARROW_LEFT, ICON_CARET_DOWN,
   ICON_CARET_LEFT, ICON_CARET_RIGHT,
+  ICON_DICE,
 }                                                      from './icons.js';
 import { qs, showScreen }                              from './utils.js';
+import { initRouter, navigate }                        from './router.js';
 import {
   renderHome,
   renderCategoryPills,
   renderLengthPicker,
 }                                                      from './render-home.js';
 import { renderGlossary, renderStatsScreen }           from './render-glossary-stats.js';
+import { renderDiceScreen, rollDice }                  from './render-dice.js';
 import { renderRoots }                                 from './render-roots.js';
 import { startQuiz, renderQuestion, handleContinue }   from './render-quiz.js';
 import {
@@ -63,13 +66,24 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const checkUpdate  = () => { if (_pendingWorker) { _applyUpdate(); return true; } return false; };
-  const doRenderHome = () => renderHome(selectedCategory, selectedLength, checkUpdate, onCategoryChange, onLengthChange);
+  const doRenderHome = () => {
+    if (window.location.hash && window.location.hash !== '#') {
+      history.replaceState(null, '', '#');
+    }
+    renderHome(selectedCategory, selectedLength, checkUpdate, onCategoryChange, onLengthChange);
+  };
 
   // Register home renderer with end-flow so advanceEndFlow can return home
   setHomeRenderer(doRenderHome);
 
-  // Initial render
-  doRenderHome();
+  // Initial render — driven by URL hash
+  initRouter({
+    '':         doRenderHome,
+    'glossary': renderGlossary,
+    'roots':    renderRoots,
+    'stats':    renderStatsScreen,
+    'dice':     () => { renderDiceScreen(); showScreen('screen-dice'); },
+  });
 
   // ── Nav button icons ──────────────────────────────────────────────
   qs('#quit-btn').innerHTML            = ICON_ARROW_LEFT;
@@ -77,6 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
   qs('#glossary-back-btn').innerHTML   = ICON_ARROW_LEFT;
   qs('#stats-back-btn').innerHTML      = ICON_ARROW_LEFT;
   qs('#roots-back-btn').innerHTML      = ICON_ARROW_LEFT;
+  qs('#dice-link').innerHTML           = ICON_DICE;
+  qs('#dice-back-btn').innerHTML       = ICON_ARROW_LEFT;
+  qs('#dice-settings-caret').innerHTML = ICON_CARET_DOWN;
   qs('#mastery-caret').innerHTML       = ICON_CARET_RIGHT;
   qs('#mastery-summary-prev').innerHTML = ICON_CARET_LEFT;
   qs('#mastery-summary-next').innerHTML = ICON_CARET_RIGHT;
@@ -123,12 +140,35 @@ document.addEventListener('DOMContentLoaded', () => {
   msScene.addEventListener('touchend',   e => onMasterySummaryTouchEnd(e.changedTouches[0].clientX));
 
 // ── Glossary / Stats / Roots ──────────────────────────────────────
-  qs('#glossary-link').addEventListener('click',        renderGlossary);
-  qs('#glossary-back-btn').addEventListener('click',    doRenderHome);
-  qs('#stats-back-btn').addEventListener('click',       doRenderHome);
-  qs('.mastery-block').addEventListener('click',        renderStatsScreen);
-  qs('#roots-link').addEventListener('click',           renderRoots);
-  qs('#roots-back-btn').addEventListener('click',       doRenderHome);
+  qs('#glossary-link').addEventListener('click',     () => navigate('glossary'));
+  qs('#glossary-back-btn').addEventListener('click', () => navigate(''));
+  qs('#stats-back-btn').addEventListener('click',    () => navigate(''));
+  qs('.mastery-block').addEventListener('click',     () => navigate('stats'));
+  qs('#roots-link').addEventListener('click',        () => navigate('roots'));
+  qs('#roots-back-btn').addEventListener('click',    () => navigate(''));
+
+  // ── Dice ──────────────────────────────────────────────────────────
+  qs('#dice-link').addEventListener('click',     () => navigate('dice'));
+  qs('#dice-back-btn').addEventListener('click', () => navigate('glossary'));
+  qs('#dice-settings-toggle').addEventListener('click', () => {
+    const panel  = qs('#dice-settings-panel');
+    const isOpen = panel.classList.toggle('open');
+    qs('#dice-settings-toggle').classList.toggle('open', isOpen);
+  });
+  qs('#dice-roll-btn').addEventListener('click', () => {
+    const n = parseInt(qs('#dice-count').value, 10) || 5;
+    rollDice(n);
+  });
+  qs('#dice-dec').addEventListener('click', () => {
+    const input = qs('#dice-count');
+    const val = Math.max(1, (parseInt(input.value, 10) || 1) - 1);
+    input.value = val;
+  });
+  qs('#dice-inc').addEventListener('click', () => {
+    const input = qs('#dice-count');
+    const val = Math.min(30, (parseInt(input.value, 10) || 1) + 1);
+    input.value = val;
+  });
 
   // ── Pose card overlay ─────────────────────────────────────────────
   qs('#pose-card-pronunciation').addEventListener('click', e => {
